@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
 import { ThemeProvider } from "../theme/ThemeProvider";
+import { Toaster } from "sonner";
 
 interface Props {
   children: ReactNode;
@@ -36,6 +37,8 @@ export default function Layout({ children }: Props) {
         enableSystem
         disableTransitionOnChange
       >
+        <Toaster richColors closeButton />
+
         <SidebarProvider>
           {showSidebar ? (
             <>

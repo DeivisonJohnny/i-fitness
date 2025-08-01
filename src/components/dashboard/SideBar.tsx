@@ -31,24 +31,24 @@ const menuItems = [
     icon: Home,
   },
   {
-    title: "Funcionários",
-    url: "/employees",
-    icon: Users,
+    title: "Minhas Refeições",
+    url: "/meals",
+    icon: ClipboardCheck,
   },
   {
-    title: "Formulário",
-    url: "/form-config",
+    title: "Adicionar Refeição",
+    url: "/add-meals",
     icon: FileText,
   },
   {
-    title: "Relatórios",
-    url: "/reports",
+    title: "Histórico",
+    url: "/history",
     icon: BarChart3,
   },
   {
-    title: "Avaliações",
-    url: "/avaliations",
-    icon: ClipboardCheck,
+    title: "Meu Perfil",
+    url: "/profile",
+    icon: Users,
   },
 ];
 
