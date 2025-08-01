@@ -49,6 +49,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 
 // Dados mockados para o histórico de refeições
 const mockMealHistory = [
@@ -469,10 +470,12 @@ export default function HistoryPage() {
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <img
+                        <Image
                           src={meal.image || "/placeholder.svg"}
                           alt={meal.type}
                           className="w-16 h-16 rounded-lg object-cover ring-1 ring-primary/10"
+                          width={1000}
+                          height={1000}
                         />
                         <div className="flex-1">
                           <h4 className="font-semibold text-foreground mb-1">

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart,
@@ -11,20 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import {
-  Home,
-  Utensils,
-  TrendingUp,
-  User,
-  LogOut,
-  Plus,
-  Sun,
-  Moon,
-  Zap,
-  Beef,
-  Wheat,
-  Droplets,
-} from "lucide-react";
+import { Plus, Zap, Beef, Wheat, Droplets } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -34,8 +20,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useTheme } from "@/hooks/useTheme";
+import Image from "next/image";
 
 // Dados mockados
 const nutritionData = {
@@ -98,22 +85,8 @@ const meals = [
   },
 ];
 
-const sidebarItems = [
-  { icon: Home, label: "Visão Geral", active: true },
-  { icon: Utensils, label: "Refeições", active: false },
-  { icon: TrendingUp, label: "Progresso", active: false },
-  { icon: User, label: "Perfil", active: false },
-  { icon: LogOut, label: "Sair", active: false },
-];
-
 export default function DashboardPage() {
-  const [isDark, setIsDark] = useState(true);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle("dark");
-  };
-
+  const { theme } = useTheme();
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -136,7 +109,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? "dark" : ""}`}>
+    <div className={`min-h-screen ${theme}`}>
       <div className="flex min-h-screen bg-slate-950 dark:bg-background">
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
@@ -345,10 +318,12 @@ export default function DashboardPage() {
                           transition={{ delay: index * 0.1 }}
                           className="flex items-center gap-4 p-3 rounded-lg bg-slate-800 dark:bg-accent/50"
                         >
-                          <img
+                          <Image
                             src={meal.image || "/placeholder.svg"}
                             alt={meal.name}
                             className="w-12 h-12 rounded-lg object-cover"
+                            width={1000}
+                            height={1000}
                           />
                           <div className="flex-1">
                             <div className="flex items-center justify-between">

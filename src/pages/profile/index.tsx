@@ -4,7 +4,6 @@ import type React from "react";
 
 import { useState } from "react";
 import { easeOut, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import {
   Mail,
   Phone,
@@ -120,7 +119,6 @@ const mockWeightHistory = [
 ];
 
 export default function ProfilePage() {
-  const router = useRouter();
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isEditingPhysical, setIsEditingPhysical] = useState(false);
   const [accountData, setAccountData] = useState(mockUserProfile);
@@ -129,6 +127,7 @@ export default function ProfilePage() {
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState(
     mockUserProfile.avatar
   );
+  console.log("🚀 ~ ProfilePage ~ avatarFile:", avatarFile);
 
   const calculateIMC = (weight: number, height: number) => {
     if (!weight || !height) return "N/A";

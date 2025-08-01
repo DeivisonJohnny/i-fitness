@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
@@ -41,6 +39,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import Image from "next/image";
+
+type Nutrients = {
+  calories: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
+};
 
 export default function AddMeals() {
   const router = useRouter();
@@ -49,15 +55,20 @@ export default function AddMeals() {
   const [mealData, setMealData] = useState({
     type: "",
     description: "",
-    time: format(new Date(), "HH:mm"), // Default to current time
+    time: format(new Date(), "HH:mm"), // Default current time
     imageFile: null as File | null,
     imagePreviewUrl: "",
   });
+
   const [estimationState, setEstimationState] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
-  const [estimatedNutrients, setEstimatedNutrients] = useState<any>(null);
-  const [showManualInput, setShowManualInput] = useState(false); // For manual input fallback
+
+  const [estimatedNutrients, setEstimatedNutrients] = useState<
+    Partial<Nutrients>
+  >({});
+
+  const [showManualInput, setShowManualInput] = useState(false);
 
   const mealTypesOptions = [
     "Café da manhã",
@@ -70,16 +81,16 @@ export default function AddMeals() {
     "Outro",
   ];
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setMealData((prev) => ({
         ...prev,
         imageFile: file,
         imagePreviewUrl: URL.createObjectURL(file),
       }));
-      setEstimationState("idle"); // Reset estimation if image changes
-      setEstimatedNutrients(null);
+      setEstimationState("idle");
+      setEstimatedNutrients({});
       setShowManualInput(false);
     }
   };
@@ -94,15 +105,14 @@ export default function AddMeals() {
     }
 
     setEstimationState("loading");
-    setEstimatedNutrients(null);
+    setEstimatedNutrients({});
     setShowManualInput(false);
 
-    // Simulate AI processing
+    // Simula processamento da IA
     await new Promise((resolve) => setTimeout(resolve, 2500));
 
-    // Simulate AI success or failure
-    const isSuccess = Math.random() > 0.2; // 80% chance of success
-    if (isSuccess) {
+    // Simula resultado (80% sucesso)
+    if (Math.random() > 0.2) {
       setEstimatedNutrients({
         calories: Math.floor(Math.random() * 600) + 300,
         protein: Math.floor(Math.random() * 40) + 15,
@@ -140,7 +150,7 @@ export default function AddMeals() {
       return;
     }
 
-    // Simulate saving data
+    // Simula salvamento dos dados
     console.log({
       mealData,
       estimatedNutrients,
@@ -151,7 +161,7 @@ export default function AddMeals() {
       description: "Sua refeição foi registrada com sucesso.",
     });
 
-    router.push("/meals"); // Redirect to "Minhas Refeições"
+    router.push("/meals");
   };
 
   const containerVariants = {
@@ -164,6 +174,7 @@ export default function AddMeals() {
       },
     },
   };
+
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -171,6 +182,34 @@ export default function AddMeals() {
       y: 0,
       transition: { duration: 0.5, ease: easeOut },
     },
+  };
+
+  const handleCaloriesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEstimatedNutrients((prev) => ({
+      ...prev,
+      calories: Number(e.target.value),
+    }));
+  };
+
+  const handleProteinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEstimatedNutrients((prev) => ({
+      ...prev,
+      protein: Number(e.target.value),
+    }));
+  };
+
+  const handleCarbsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEstimatedNutrients((prev) => ({
+      ...prev,
+      carbs: Number(e.target.value),
+    }));
+  };
+
+  const handleFatChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEstimatedNutrients((prev) => ({
+      ...prev,
+      fat: Number(e.target.value),
+    }));
   };
 
   return (
@@ -194,7 +233,7 @@ export default function AddMeals() {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
               Adicionar Refeição
             </h1>
-            <div className="w-10" /> {/* Placeholder for alignment */}
+            <div className="w-10" /> {/* Placeholder para alinhamento */}
           </div>
           <p className="text-lg text-muted-foreground text-center max-w-xl mx-auto">
             Envie uma foto e descreva sua refeição para obter estimativas
@@ -205,7 +244,7 @@ export default function AddMeals() {
         <motion.div variants={itemVariants}>
           <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg">
             <CardContent className="space-y-8 py-6">
-              {/* Seção de Upload */}
+              {/* Upload */}
               <div className="space-y-4 text-center">
                 <Label
                   htmlFor="image-upload"
@@ -227,10 +266,12 @@ export default function AddMeals() {
                   />
                   {mealData.imagePreviewUrl ? (
                     <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                      <img
+                      <Image
                         src={mealData.imagePreviewUrl || "/placeholder.svg"}
                         alt="Preview da Refeição"
                         className="w-full h-full object-cover"
+                        width={1000}
+                        height={1000}
                       />
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Camera className="w-8 h-8 text-white" />
@@ -255,7 +296,7 @@ export default function AddMeals() {
 
               <Separator />
 
-              {/* Seção de Detalhes da Refeição */}
+              {/* Detalhes da Refeição */}
               <div className="space-y-6">
                 <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
                   <Utensils className="w-5 h-5 text-primary" />
@@ -303,7 +344,7 @@ export default function AddMeals() {
                   />
                 </div>
 
-                {/* Descrição Textual */}
+                {/* Descrição */}
                 <div className="space-y-2">
                   <Label
                     htmlFor="description"
@@ -327,7 +368,7 @@ export default function AddMeals() {
                   />
                 </div>
 
-                {/* Botão Estimar Nutrientes com IA */}
+                {/* Botão Estimar Nutrientes */}
                 <Button
                   onClick={handleEstimateNutrients}
                   disabled={
@@ -377,7 +418,9 @@ export default function AddMeals() {
                           </span>
                         </div>
                         <Progress
-                          value={(estimatedNutrients.calories / 1000) * 100}
+                          value={
+                            ((estimatedNutrients.calories ?? 0) / 1000) * 100
+                          }
                           className="h-2"
                         />
                       </div>
@@ -393,7 +436,9 @@ export default function AddMeals() {
                           </span>
                         </div>
                         <Progress
-                          value={(estimatedNutrients.protein / 100) * 100}
+                          value={
+                            ((estimatedNutrients.protein ?? 0) / 100) * 100
+                          }
                           className="h-2"
                         />
                       </div>
@@ -409,7 +454,7 @@ export default function AddMeals() {
                           </span>
                         </div>
                         <Progress
-                          value={(estimatedNutrients.carbs / 200) * 100}
+                          value={((estimatedNutrients.carbs ?? 0) / 200) * 100}
                           className="h-2"
                         />
                       </div>
@@ -425,7 +470,7 @@ export default function AddMeals() {
                           </span>
                         </div>
                         <Progress
-                          value={(estimatedNutrients.fat / 80) * 100}
+                          value={((estimatedNutrients.fat ?? 0) / 80) * 100}
                           className="h-2"
                         />
                       </div>
@@ -463,7 +508,7 @@ export default function AddMeals() {
                 )}
               </AnimatePresence>
 
-              {/* Input Manual de Nutrientes (se IA falhar ou for ativado) */}
+              {/* Input Manual */}
               <AnimatePresence>
                 {showManualInput && (
                   <motion.div
@@ -485,13 +530,8 @@ export default function AddMeals() {
                           id="manual-calories"
                           type="number"
                           placeholder="Ex: 450"
-                          value={estimatedNutrients?.calories || ""}
-                          onChange={(e) =>
-                            setEstimatedNutrients((prev: any) => ({
-                              ...prev,
-                              calories: Number(e.target.value),
-                            }))
-                          }
+                          value={estimatedNutrients.calories ?? ""}
+                          onChange={handleCaloriesChange}
                         />
                       </div>
                       <div className="space-y-2">
@@ -500,13 +540,8 @@ export default function AddMeals() {
                           id="manual-protein"
                           type="number"
                           placeholder="Ex: 30"
-                          value={estimatedNutrients?.protein || ""}
-                          onChange={(e) =>
-                            setEstimatedNutrients((prev: any) => ({
-                              ...prev,
-                              protein: Number(e.target.value),
-                            }))
-                          }
+                          value={estimatedNutrients.protein ?? ""}
+                          onChange={handleProteinChange}
                         />
                       </div>
                       <div className="space-y-2">
@@ -515,13 +550,8 @@ export default function AddMeals() {
                           id="manual-carbs"
                           type="number"
                           placeholder="Ex: 50"
-                          value={estimatedNutrients?.carbs || ""}
-                          onChange={(e) =>
-                            setEstimatedNutrients((prev: any) => ({
-                              ...prev,
-                              carbs: Number(e.target.value),
-                            }))
-                          }
+                          value={estimatedNutrients.carbs ?? ""}
+                          onChange={handleCarbsChange}
                         />
                       </div>
                       <div className="space-y-2">
@@ -530,13 +560,8 @@ export default function AddMeals() {
                           id="manual-fat"
                           type="number"
                           placeholder="Ex: 15"
-                          value={estimatedNutrients?.fat || ""}
-                          onChange={(e) =>
-                            setEstimatedNutrients((prev: any) => ({
-                              ...prev,
-                              fat: Number(e.target.value),
-                            }))
-                          }
+                          value={estimatedNutrients.fat ?? ""}
+                          onChange={handleFatChange}
                         />
                       </div>
                     </div>
@@ -544,13 +569,14 @@ export default function AddMeals() {
                 )}
               </AnimatePresence>
 
-              {/* Botão Final de Ação */}
+              {/* Botões de ação */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button
                   onClick={handleSaveMeal}
                   disabled={
                     estimationState === "loading" ||
-                    (!estimatedNutrients && !showManualInput)
+                    (Object.keys(estimatedNutrients).length === 0 &&
+                      !showManualInput)
                   }
                   className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-md"
                 >

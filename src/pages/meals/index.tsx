@@ -1,8 +1,6 @@
 "use client";
 
-import type React from "react";
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence, easeOut, Variants } from "framer-motion";
 import {
   Plus,
@@ -54,6 +52,22 @@ import {
 } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
+
+// Tipagem para nutrientes estimados
+interface EstimatedNutrientsType {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+interface NewMealType {
+  type: string;
+  description: string;
+  time: string;
+  image: File | null;
+}
 
 // Dados mockados
 const mockMeals = [
@@ -111,12 +125,13 @@ export default function MealsPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEstimating, setIsEstimating] = useState(false);
-  const [estimatedNutrients, setEstimatedNutrients] = useState<any>(null);
-  const [newMeal, setNewMeal] = useState({
+  const [estimatedNutrients, setEstimatedNutrients] =
+    useState<EstimatedNutrientsType | null>(null);
+  const [newMeal, setNewMeal] = useState<NewMealType>({
     type: "",
     description: "",
     time: "",
-    image: null as File | null,
+    image: null,
   });
 
   const handleEstimateNutrients = async () => {
@@ -124,7 +139,6 @@ export default function MealsPage() {
 
     setIsEstimating(true);
 
-    // Simular chamada para IA
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     setEstimatedNutrients({
@@ -163,33 +177,7 @@ export default function MealsPage() {
     },
   };
 
-  const EmptyState = () => (
-    <motion.div
-      variants={itemVariants}
-      className="flex flex-col items-center justify-center py-16 text-center"
-    >
-      <div className="w-32 h-32 mb-6 rounded-full bg-gradient-to-br from-muted/20 to-muted/40 flex items-center justify-center">
-        <Camera className="w-16 h-16 text-muted-foreground/50" />
-      </div>
-      <h3 className="text-xl font-semibold text-foreground mb-2">
-        Nenhuma refeição registrada
-      </h3>
-      <p className="text-muted-foreground mb-6 max-w-md">
-        Comece registrando sua primeira refeição e deixe nossa IA estimar os
-        nutrientes para você.
-      </p>
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogTrigger asChild>
-          <Button className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90">
-            <Plus className="w-4 h-4 mr-2" />
-            Adicionar Primeira Refeição
-          </Button>
-        </DialogTrigger>
-        <AddMealModal />
-      </Dialog>
-    </motion.div>
-  );
-
+  // Modal de adicionar refeição
   const AddMealModal = () => (
     <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
       <DialogHeader>
@@ -241,7 +229,7 @@ export default function MealsPage() {
           <Label htmlFor="type">Tipo da Refeição</Label>
           <Select
             value={newMeal.type}
-            onValueChange={(value: any) =>
+            onValueChange={(value: string) =>
               setNewMeal((prev) => ({ ...prev, type: value }))
             }
           >
@@ -265,7 +253,7 @@ export default function MealsPage() {
             id="description"
             placeholder="Descreva o que você comeu ou vai comer..."
             value={newMeal.description}
-            onChange={(e: any) =>
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setNewMeal((prev) => ({ ...prev, description: e.target.value }))
             }
             rows={3}
@@ -279,7 +267,7 @@ export default function MealsPage() {
             id="time"
             type="time"
             value={newMeal.time}
-            onChange={(e) =>
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setNewMeal((prev) => ({ ...prev, time: e.target.value }))
             }
           />
@@ -315,6 +303,7 @@ export default function MealsPage() {
             >
               <Separator />
               <div className="space-y-3">
+                {/* Exibição dos nutrientes estimados */}
                 <div className="flex items-center gap-2">
                   <Bot className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">Estimativa por IA</span>
@@ -324,6 +313,7 @@ export default function MealsPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                  {/* Calorias */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -336,7 +326,7 @@ export default function MealsPage() {
                     </div>
                     <Progress value={75} className="h-2" />
                   </div>
-
+                  {/* Proteínas */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -349,7 +339,7 @@ export default function MealsPage() {
                     </div>
                     <Progress value={60} className="h-2" />
                   </div>
-
+                  {/* Carboidratos */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -362,7 +352,7 @@ export default function MealsPage() {
                     </div>
                     <Progress value={80} className="h-2" />
                   </div>
-
+                  {/* Gorduras */}
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground flex items-center gap-1">
@@ -381,7 +371,7 @@ export default function MealsPage() {
           )}
         </AnimatePresence>
 
-        {/* Botões de Ação */}
+        {/* Botões */}
         <div className="flex gap-3 pt-4">
           <Button
             variant="outline"
@@ -483,7 +473,13 @@ export default function MealsPage() {
 
           {/* Meals List */}
           {mockMeals.length === 0 ? (
-            <EmptyState />
+            <div
+              className="flex flex-col items-center justify-center py-16 text-center"
+              style={{ opacity: 0.3 }}
+            >
+              {/* EmptyState code se preferir */}
+              Nenhuma refeição registrada
+            </div>
           ) : (
             <motion.div
               variants={itemVariants}
@@ -500,10 +496,13 @@ export default function MealsPage() {
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          <img
+                          {/* Substitua por next/image para melhor performance */}
+                          <Image
                             src={meal.image || "/placeholder.svg"}
                             alt={meal.name}
                             className="w-16 h-16 rounded-lg object-cover ring-2 ring-primary/10"
+                            width={1000}
+                            height={1000}
                           />
                           <div>
                             <CardTitle className="text-lg">

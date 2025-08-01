@@ -283,7 +283,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { theme, toggleTheme } = useTheme();
+  const { toggleTheme } = useTheme();
   const [isRegistering, setIsRegistering] = useState(false);
 
   const router = useRouter();
