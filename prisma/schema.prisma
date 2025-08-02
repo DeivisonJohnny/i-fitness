@@ -34,7 +34,7 @@ enum Objective {
 }
 
 enum TypeTraining {
-  Musculacao            @map("Mosculação")
+  Musculacao            @map("Musculação")
   Cardio_Aerobico       @map("Cardio / Aeróbico")
   Treinamento_Funcional @map("Treinamento funcional")
   HIIT                  @map("HIIT (Treino Intervalado de Alta Intensidade)")
