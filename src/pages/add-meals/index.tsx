@@ -213,7 +213,14 @@ export default function AddMeals() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 py-8">
+    <div
+      className="min-h-screen 
+    
+    bg-gradient-to-br from-foreground via-foreground to-muted/80 
+    
+
+    dark:bg-gradient-to-br dark:from-background dark:via-background dark:to-muted/20 py-8"
+    >
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -222,15 +229,8 @@ export default function AddMeals() {
       >
         {/* Header */}
         <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push("/meals")}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+          <div className="flex items-center justify-center mb-4">
+            <h1 className="text-3xl font-bold dark:bg-gradient-to-r dark:from-foreground dark:to-foreground/80 dark:bg-clip-text dark:text-transparent  text-black   ">
               Adicionar Refeição
             </h1>
             <div className="w-10" /> {/* Placeholder para alinhamento */}
@@ -248,7 +248,7 @@ export default function AddMeals() {
               <div className="space-y-4 text-center">
                 <Label
                   htmlFor="image-upload"
-                  className="block text-lg font-semibold text-foreground"
+                  className="block text-lg font-semibold  text-black dark:text-foreground"
                 >
                   Foto da Refeição
                 </Label>
@@ -298,8 +298,8 @@ export default function AddMeals() {
 
               {/* Detalhes da Refeição */}
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                  <Utensils className="w-5 h-5 text-primary" />
+                <h3 className="text-xl font-semibold text-back dark:text-foreground flex items-center gap-2">
+                  <Utensils className="w-5 h-5 dark:text-primary" />
                   Detalhes da Refeição
                 </h3>
 
@@ -367,28 +367,6 @@ export default function AddMeals() {
                     required
                   />
                 </div>
-
-                {/* Botão Estimar Nutrientes */}
-                <Button
-                  onClick={handleEstimateNutrients}
-                  disabled={
-                    estimationState === "loading" ||
-                    (!mealData.imageFile && !mealData.description.trim())
-                  }
-                  className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
-                >
-                  {estimationState === "loading" ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      IA Analisando...
-                    </>
-                  ) : (
-                    <>
-                      <Bot className="w-4 h-4 mr-2" />
-                      Estimar Nutrientes com IA
-                    </>
-                  )}
-                </Button>
               </div>
 
               {/* Estimativa Nutricional */}
@@ -573,12 +551,12 @@ export default function AddMeals() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button
                   onClick={handleSaveMeal}
-                  disabled={
-                    estimationState === "loading" ||
-                    (Object.keys(estimatedNutrients).length === 0 &&
-                      !showManualInput)
-                  }
-                  className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-md"
+                  // disabled={
+                  //   estimationState === "loading" ||
+                  //   (Object.keys(estimatedNutrients).length === 0 &&
+                  //     !showManualInput)
+                  // }
+                  className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-md text-white dark:text-white"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   Salvar Refeição
