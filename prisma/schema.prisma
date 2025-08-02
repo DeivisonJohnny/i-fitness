@@ -3,6 +3,51 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String                @id @default(uuid())
+  name                    String
+  sex                     String
+  born                    DateTime
+  height                  Int
+  weight                  Float
+  Profession              String
+  training_frequency_week Int
+  physical_activity_level PhysicalActivityLevel
+  type_training           TypeTraining
+  objective               Objective
+}
+
+enum PhysicalActivityLevel {
+  Ativo
+  Moderado
+  Sedentário
+}
+
+enum Objective {
+  Emagrecer
+  Manter
+  Ganhar_Massa @map("Ganhar Massa")
+}
+
+enum TypeTraining {
+  Musculacao            @map("Mosculação")
+  Cardio_Aerobico       @map("Cardio / Aeróbico")
+  Treinamento_Funcional @map("Treinamento funcional")
+  HIIT                  @map("HIIT (Treino Intervalado de Alta Intensidade)")
+  Crossfit
+  Pilates
+  Yoga
+  Corrida
+  Caminhada
+  Ciclismo
+  Natacao               @map("Natação")
+  Esportes_Coletivos    @map("Esportes coletivos (futebol, vôlei, basquete etc.)")
+  Danca_Zumba           @map("Dança / Zumba")
+  Lutas_Artes_Marcial   @map("Lutas / Artes marciais (jiu-jitsu, muay thai, boxe etc.)")
+  Treino_Em_Casa        @map("Treino em casa (sem equipamentos)")
+  Outros                @map("Outros (campo de texto para personalizar)")
 }
