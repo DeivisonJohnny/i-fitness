@@ -1,9 +1,5 @@
-import { useRouter } from "next/router";
+import AuthPage from "./auth/[form]";
 
 export default function Initial() {
-  const router = useRouter();
-
-  router.push("/auth/login");
-
-  return;
+  return <AuthPage />;
 }

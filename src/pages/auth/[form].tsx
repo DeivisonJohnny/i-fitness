@@ -305,7 +305,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex w-full">
       <Button
         variant="ghost"
         size="icon"

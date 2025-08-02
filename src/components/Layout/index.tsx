@@ -16,11 +16,11 @@ interface Props {
 export default function Layout({ children }: Props) {
   const pathname = usePathname();
 
-  const isLandingPage = pathname === "/";
-  const isLoginPage = pathname === "/form/login";
-  const isSignupPage = pathname === "/form/signup";
+  const initialPage = pathname === "/";
+  const isLoginPage = pathname === "/auth/login";
+  const isSignupPage = pathname === "/auth/signup";
 
-  const showSidebar = !isLandingPage && !isLoginPage && !isSignupPage;
+  const showSidebar = !initialPage && !isLoginPage && !isSignupPage;
 
   function LoadPage() {
     return (
