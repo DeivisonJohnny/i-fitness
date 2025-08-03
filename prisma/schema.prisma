@@ -10,27 +10,40 @@ datasource db {
 model User {
   id                      String                @id @default(uuid())
   name                    String
-  sex                     String
+  surname                 String
+  email                   String                @unique
+  password                String
+  sex                     Sex
   born                    DateTime
   height                  Int
   weight                  Float
-  Profession              String
+  profession              String
   training_frequency_week Int
   physical_activity_level PhysicalActivityLevel
   type_training           TypeTraining
   objective               Objective
 }
 
+enum Sex {
+  Masculino
+  Feminino
+  Alienigina
+}
+
 enum PhysicalActivityLevel {
-  Ativo
-  Moderado
-  Sedentário
+  Sedentario          @map("Pouco ou nenhum exercício, trabalho majoritariamente sentado")
+  Levemente_Ativo     @map("Caminhadas ocasionais, atividade leve 1–2x por semana")
+  Moderadamente_Ativo @map("Exercícios moderados 3–5x por semana")
+  Muito_Ativo         @map("Exercícios intensos 6–7x por semana")
+  Extremamente_Ativo  @map("Atividade física pesada diariamente ou trabalho físico exigente (ex: pedreiro, atleta etc.)")
 }
 
 enum Objective {
-  Emagrecer
-  Manter
-  Ganhar_Massa @map("Ganhar Massa")
+  Sedentario          @map("1.2")
+  Levemente_Ativo     @map("1.375")
+  Moderadamente_Ativo @map("1.55")
+  Muito_Ativo         @map("1.725")
+  Extremamente_Ativo  @map("1.9")
 }
 
 enum TypeTraining {

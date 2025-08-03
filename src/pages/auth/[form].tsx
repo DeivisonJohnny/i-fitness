@@ -2,6 +2,10 @@
 
 import type React from "react";
 
+import * as yup from "yup";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,22 +15,92 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, Sun, Moon } from "lucide-react";
 import { useRouter } from "next/router";
 import { useTheme } from "@/hooks/useTheme";
+import {
+  objectiveOptions,
+  physicalActivityLevelOptions,
+  sexOptions,
+} from "@/lib/enums";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+type FormRegisterUser = {
+  name: string;
+  surname: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+type FormComplementUser = {
+  sex: string;
+  born: Date;
+  height: number;
+  weight: number;
+  profession: string;
+  training_frequency_week: string;
+  physical_activity_level: string;
+  type_training: string;
+  objective: string;
+};
+function formatEnumLabel(value: string): string {
+  return value
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/^(\w)/, (match) => match.toUpperCase());
+}
 
 function RegistrationForm() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<"next" | "back">("next");
 
   const [formData, setFormData] = useState({
-    nome: "",
+    name: "",
+    surname: "",
     email: "",
-    senha: "",
-    confirmacaoSenha: "",
-    idade: "",
-    altura: "",
-    peso: "",
-    sexo: "",
-    nivelAtividade: "",
-    objetivo: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const validationSchema = yup.object().shape({
+    name: yup
+      .string()
+      .min(3, "Este campo deve ter pelo menos 3 caracteres")
+      .max(80, "Máximo de 80 caracteres")
+      .required("Campo obrigatório"),
+    surname: yup
+      .string()
+      .min(3, "Este campo deve ter pelo menos 3 caracteres")
+      .max(80, "Máximo de 80 caracteres")
+      .required("Campo obrigatório"),
+    email: yup.string().email("E-mail inválido").required("Campo obrigatório"),
+    password: yup
+      .string()
+      .min(8, "A senha deve ter pelo menos 8 caracteres")
+      .required("Senha obrigatória"),
+
+    confirmPassword: yup
+      .string()
+      .oneOf([yup.ref("password"), undefined], "As senhas não coincidem")
+      .required("Confirmação de senha obrigatória"),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormRegisterUser>({
+    resolver: yupResolver(validationSchema),
+    mode: "onChange",
   });
 
   const router = useRouter();
@@ -76,11 +150,208 @@ function RegistrationForm() {
     }),
   };
 
+  const onSubmit = (data: FormRegisterUser) => {
+    console.log("Dados válidos:", data);
+    // Aqui você pode chamar API, cadastrar usuário, etc.
+  };
+
+  return (
+    <>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="relative min-h-[250px] overflow-hidden space-y-4"
+      >
+        <AnimatePresence mode="wait" custom={direction}>
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              custom={direction}
+              variants={slideVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <Label>Nome</Label>
+              <Input
+                {...register("name")}
+                name="name"
+                onChange={handleChange}
+                required
+              />
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
+              <Label>Sobrenome</Label>
+              <Input
+                {...register("surname")}
+                name="surname"
+                onChange={handleChange}
+                required
+              />
+              {errors.surname && (
+                <p className="text-red-500 text-sm">{errors.surname.message}</p>
+              )}
+              <Label className="mt-4">Email</Label>
+              <Input
+                {...register("email")}
+                name="email"
+                type="email"
+                onChange={handleChange}
+                required
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
+
+              <Button
+                type="button"
+                onClick={handleNext}
+                className="w-full mt-4"
+              >
+                Próximo
+              </Button>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              custom={direction}
+              variants={slideVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <Label>Senha</Label>
+              <Input
+                name="senha"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
+
+              <Label className="mt-4">Confirmar senha</Label>
+              <Input
+                name="confirmacaoSenha"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+
+              <div
+                className="flex
+            flex-col justify-between gap-2 mt-4"
+              >
+                <Button type="submit" className="w-full">
+                  Cadastrar-se
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </form>
+    </>
+  );
+}
+
+function CompletRegister() {
+  const [step, setStep] = useState(1);
+  const [direction, setDirection] = useState<"next" | "back">("next");
+
+  const validationSchemaComplement = yup.object().shape({
+    sex: yup.string().required("Campo obrigatório"),
+    born: yup
+      .date()
+      .required("Data de nascimento é obrigatória")
+      .typeError("Data inválida"),
+    height: yup
+      .number()
+      .min(30, "Altura mínima: 30cm")
+      .max(300, "Altura máxima: 300cm")
+      .required("Altura é obrigatória")
+      .typeError("Precisa ser numero"),
+
+    weight: yup
+      .number()
+      .min(10, "Peso mínimo: 10kg")
+      .max(500, "Peso máximo: 500kg")
+      .required("Peso é obrigatório")
+      .typeError("Precisa ser numero"),
+    objective: yup.string().required("O campo deve ser preenchido"),
+    physical_activity_level: yup
+      .string()
+      .required("O campo deve ser preenchido"),
+    profession: yup
+      .string()
+      .min(3, "O campo deve ter ao menos 3 caracteres")
+      .max(30, "O campo deve ter no maximo 30 caracteres")
+      .required("O campo deve ser preenchido"),
+    training_frequency_week: yup
+      .string()
+      .required("O campo deve ser preenchido"),
+    type_training: yup.string().required("O campo deve ser preenchido"),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    trigger,
+  } = useForm<FormComplementUser>({
+    resolver: yupResolver(validationSchemaComplement),
+
+    mode: "onChange",
+  });
+
+  const handleNext = async (fields: string[] = []) => {
+    const isStepValid = await trigger(fields as (keyof FormComplementUser)[]);
+    if (isStepValid) {
+      setDirection("next");
+      setStep((prev) => prev + 1);
+    }
+  };
+
+  const handleBack = () => {
+    setDirection("back");
+    setStep((prev) => prev - 1);
+  };
+
+  const slideVariants = {
+    initial: (custom: "next" | "back") => ({
+      x: custom === "next" ? 300 : -300,
+      opacity: 0,
+      position: "absolute" as const,
+    }),
+    animate: {
+      x: 0,
+      opacity: 1,
+      position: "relative" as const,
+      transition: {
+        type: "spring" as const,
+        stiffness: 130,
+        damping: 15,
+      },
+    },
+    exit: (custom: "next" | "back") => ({
+      x: custom === "next" ? -300 : 300,
+      opacity: 0,
+      position: "absolute" as const,
+    }),
+  };
+
+  function handleCompletRegister(data: FormComplementUser) {
+    console.log("🚀 ~ handleCompletRegister ~ data:", data);
+  }
+  console.log(sexOptions);
   return (
     <form
-      onSubmit={handleRegister}
+      onSubmit={handleSubmit(handleCompletRegister)}
       className="relative min-h-[250px] overflow-hidden space-y-4"
     >
+      {" "}
       <AnimatePresence mode="wait" custom={direction}>
         {step === 1 && (
           <motion.div
@@ -91,29 +362,75 @@ function RegistrationForm() {
             animate="animate"
             exit="exit"
           >
-            <Label>Nome completo</Label>
-            <Input
-              name="nome"
-              value={formData.nome}
-              onChange={handleChange}
-              required
-            />
-
-            <Label className="mt-4">Email</Label>
-            <Input
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-
-            <Button type="button" onClick={handleNext} className="w-full mt-4">
-              Próximo
-            </Button>
+            <div className="flex flex-col gap-[5px]">
+              <Label htmlFor="born">Data de Nascimento</Label>
+              <Input id="born" {...register("born")} type="date" />
+              {errors.born && (
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key="born-error"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {errors.born.message}
+                  </motion.p>
+                </AnimatePresence>
+              )}
+            </div>
+            <div className="flex flex-col gap-[5px]">
+              <Label htmlFor="height" className="mt-4">
+                Altura (cm)
+              </Label>
+              <Input id="height" {...register("height")} type="number" />
+              {errors.height && (
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key="height-error"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {errors.height.message}
+                  </motion.p>
+                </AnimatePresence>
+              )}
+            </div>
+            <div className="flex flex-col gap-[5px]">
+              <Label htmlFor="weight" className="mt-4">
+                Peso (kg)
+              </Label>
+              <Input id="weight" {...register("weight")} type="number" />
+              {errors.weight && (
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key="weight-error"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {errors.weight.message}
+                  </motion.p>
+                </AnimatePresence>
+              )}
+            </div>
+            <div className="flex justify-between gap-2 mt-4">
+              <Button
+                type="button"
+                onClick={() => handleNext(["born", "height", "weight"])}
+                className="w-full"
+              >
+                Próximo
+              </Button>
+            </div>
           </motion.div>
         )}
-
         {step === 2 && (
           <motion.div
             key="step2"
@@ -123,143 +440,131 @@ function RegistrationForm() {
             animate="animate"
             exit="exit"
           >
-            <Label>Senha</Label>
-            <Input
-              name="senha"
-              type="password"
-              value={formData.senha}
-              onChange={handleChange}
-              required
-            />
-
-            <Label className="mt-4">Confirmar senha</Label>
-            <Input
-              name="confirmacaoSenha"
-              type="password"
-              value={formData.confirmacaoSenha}
-              onChange={handleChange}
-              required
-            />
-
-            <div className="flex justify-between gap-2 mt-4">
-              <Button
-                type="button"
-                onClick={handleBack}
-                className="w-full opacity-70"
-              >
-                Voltar
-              </Button>
-              <Button type="button" onClick={handleNext} className="w-full">
-                Próximo
-              </Button>
+            <div className="flex flex-col gap-[5px]">
+              <Label htmlFor="sex">Sexo</Label>
+              <Controller
+                name="sex"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="sex" className="w-full">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sexOptions &&
+                        sexOptions.map((sex) => (
+                          <SelectItem key={sex} value={sex}>
+                            {formatEnumLabel(sex)}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.sex && (
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key="sex-error"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {errors.sex.message}
+                  </motion.p>
+                </AnimatePresence>
+              )}
             </div>
-          </motion.div>
-        )}
-
-        {step === 3 && (
-          <motion.div
-            key="step3"
-            custom={direction}
-            variants={slideVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <Label>Idade</Label>
-            <Input
-              name="idade"
-              type="number"
-              value={formData.idade}
-              onChange={handleChange}
-              required
-            />
-
-            <Label className="mt-4">Altura (cm)</Label>
-            <Input
-              name="altura"
-              type="number"
-              value={formData.altura}
-              onChange={handleChange}
-              required
-            />
-
-            <Label className="mt-4">Peso (kg)</Label>
-            <Input
-              name="peso"
-              type="number"
-              value={formData.peso}
-              onChange={handleChange}
-              required
-            />
-
-            <div className="flex justify-between gap-2 mt-4">
-              <Button
-                type="button"
-                onClick={handleBack}
-                className="w-full opacity-70"
-              >
-                Voltar
-              </Button>
-              <Button type="button" onClick={handleNext} className="w-full">
-                Próximo
-              </Button>
+            <div className="flex flex-col gap-[5px]">
+              <Label htmlFor="physical_activity_level" className="mt-4">
+                Nível de atividade
+              </Label>
+              <Controller
+                name="physical_activity_level"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger
+                      id="physical_activity_level"
+                      className="w-full"
+                    >
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {physicalActivityLevelOptions &&
+                        Object.entries(physicalActivityLevelOptions).map(
+                          ([valueKey, description]) => (
+                            <SelectItem key={valueKey} value={valueKey}>
+                              <Tooltip>
+                                <TooltipTrigger className="w-full h-full ">
+                                  {formatEnumLabel(valueKey)}
+                                </TooltipTrigger>
+                                <TooltipContent className="z-[50]">
+                                  {description}
+                                </TooltipContent>
+                              </Tooltip>
+                            </SelectItem>
+                          )
+                        )}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.physical_activity_level && (
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key="physical-activity-error"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {errors.physical_activity_level.message}
+                  </motion.p>
+                </AnimatePresence>
+              )}
             </div>
-          </motion.div>
-        )}
-
-        {step === 4 && (
-          <motion.div
-            key="step4"
-            custom={direction}
-            variants={slideVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-          >
-            <Label>Sexo</Label>
-            <select
-              name="sexo"
-              value={formData.sexo}
-              onChange={handleChange}
-              className="w-full mt-1 p-2 rounded-md border text-black dark:text-white bg-white dark:bg-zinc-800"
-              required
-            >
-              <option value="">Selecione</option>
-              <option value="masculino">Masculino</option>
-              <option value="feminino">Feminino</option>
-              <option value="outro">Outro</option>
-            </select>
-
-            <Label className="mt-4">Nível de atividade</Label>
-            <select
-              name="nivelAtividade"
-              value={formData.nivelAtividade}
-              onChange={handleChange}
-              className="w-full mt-1 p-2 rounded-md border text-black dark:text-white bg-white dark:bg-zinc-800"
-              required
-            >
-              <option value="">Selecione</option>
-              <option value="sedentario">Sedentário</option>
-              <option value="moderado">Moderado</option>
-              <option value="ativo">Ativo</option>
-              <option value="muito_ativo">Muito ativo</option>
-            </select>
-
-            <Label className="mt-4">Objetivo</Label>
-            <select
-              name="objetivo"
-              value={formData.objetivo}
-              onChange={handleChange}
-              className="w-full mt-1 p-2 rounded-md border text-black dark:text-white bg-white dark:bg-zinc-800"
-              required
-            >
-              <option value="">Selecione</option>
-              <option value="perder_peso">Perder peso</option>
-              <option value="ganhar_massa">Ganhar massa</option>
-              <option value="manter_peso">Manter peso</option>
-            </select>
-
-            <div className="flex justify-between gap-2 mt-4">
+            <div className="flex flex-col gap-[5px]">
+              <Label htmlFor="objective" className="mt-4">
+                Objetivo
+              </Label>
+              <Controller
+                name="objective"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="objective" className="w-full">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {objectiveOptions &&
+                        objectiveOptions.map((objective) => (
+                          <SelectItem key={objective} value={objective}>
+                            {formatEnumLabel(objective)}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.objective && (
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key="objective-error"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {errors.objective.message}
+                  </motion.p>
+                </AnimatePresence>
+              )}
+            </div>
+            <div className="flex flex-col justify-between gap-2 mt-4">
               <Button
                 type="button"
                 onClick={handleBack}
@@ -398,7 +703,8 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold text-black dark:text-white mb-4">
                   Criar conta
                 </h2>
-                <RegistrationForm />
+                <CompletRegister />
+                {/* <RegistrationForm /> */}
                 <div className="text-center text-sm text-muted-foreground mt-4">
                   Já tem uma conta?{" "}
                   <button
@@ -487,7 +793,6 @@ export default function AuthPage() {
                     type="submit"
                     className="w-full h-12 text-base bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                     disabled={isLoading}
-                    onClick={() => router.push("/dashboard")}
                   >
                     {isLoading ? (
                       <div className="flex items-center space-x-2">
