@@ -98,6 +98,7 @@ function RegistrationForm() {
     register,
     handleSubmit,
     formState: { errors },
+    trigger,
   } = useForm<FormRegisterUser>({
     resolver: yupResolver(validationSchema),
     mode: "onChange",
@@ -105,9 +106,12 @@ function RegistrationForm() {
 
   const router = useRouter();
 
-  const handleNext = () => {
-    setDirection("next");
-    setStep((prev) => prev + 1);
+  const handleNext = async (fields: (keyof FormRegisterUser)[] = []) => {
+    const isStepValid = await trigger(fields);
+    if (isStepValid) {
+      setDirection("next");
+      setStep((prev) => prev + 1);
+    }
   };
 
   const handleBack = () => {
@@ -119,12 +123,6 @@ function RegistrationForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Cadastro enviado:", formData);
-    router.replace("/dashboard"); // redireciona após cadastro
   };
 
   const slideVariants = {
@@ -159,7 +157,7 @@ function RegistrationForm() {
     <>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="relative min-h-[250px] overflow-hidden space-y-4"
+        className="relative min-h-[250px] overflow-hidden space-y-4  "
       >
         <AnimatePresence mode="wait" custom={direction}>
           {step === 1 && (
@@ -170,42 +168,67 @@ function RegistrationForm() {
               initial="initial"
               animate="animate"
               exit="exit"
+              className=" flex flex-col gap-[10px]"
             >
-              <Label>Nome</Label>
-              <Input
-                {...register("name")}
-                name="name"
-                onChange={handleChange}
-                required
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
-              )}
-              <Label>Sobrenome</Label>
-              <Input
-                {...register("surname")}
-                name="surname"
-                onChange={handleChange}
-                required
-              />
-              {errors.surname && (
-                <p className="text-red-500 text-sm">{errors.surname.message}</p>
-              )}
-              <Label className="mt-4">Email</Label>
-              <Input
-                {...register("email")}
-                name="email"
-                type="email"
-                onChange={handleChange}
-                required
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
-              )}
+              <div className="flex flex-col gap-[5px]">
+                <Label>Nome</Label>
+                <Input {...register("name")} onChange={handleChange} />
+                {errors.name && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="name-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.name.message}
+                    </motion.p>
+                  </AnimatePresence>
+                )}
+              </div>
+              <div className="flex flex-col gap-[5px]">
+                <Label>Sobrenome</Label>
+                <Input {...register("surname")} />
+                {errors.surname && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="surname-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.surname.message}
+                    </motion.p>
+                  </AnimatePresence>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-[5px]">
+                <Label>Email</Label>
+                <Input {...register("email")} type="email" />
+                {errors.email && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="email-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.email.message}
+                    </motion.p>
+                  </AnimatePresence>
+                )}
+              </div>
 
               <Button
                 type="button"
-                onClick={handleNext}
+                onClick={() => handleNext(["name", "surname", "email"])}
                 className="w-full mt-4"
               >
                 Próximo
@@ -222,28 +245,53 @@ function RegistrationForm() {
               animate="animate"
               exit="exit"
             >
-              <Label>Senha</Label>
-              <Input
-                name="senha"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-
-              <Label className="mt-4">Confirmar senha</Label>
-              <Input
-                name="confirmacaoSenha"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-
+              <div className="flex flex-col gap-[5px]">
+                <Label>Senha</Label>
+                <Input {...register("password")} type="password" />
+                {errors.password && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="password-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.password.message}
+                    </motion.p>
+                  </AnimatePresence>
+                )}
+              </div>
+              <div className="flex flex-col gap-[5px]">
+                <Label className="mt-4">Confirmar senha</Label>
+                <Input {...register("confirmPassword")} type="password" />
+                {errors.confirmPassword && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="confirmPassword-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.confirmPassword.message}
+                    </motion.p>
+                  </AnimatePresence>
+                )}
+              </div>
               <div
                 className="flex
             flex-col justify-between gap-2 mt-4"
               >
+                <Button
+                  className="w-full"
+                  variant={"secondary"}
+                  onClick={handleBack}
+                >
+                  Voltar
+                </Button>
                 <Button type="submit" className="w-full">
                   Cadastrar-se
                 </Button>
@@ -775,8 +823,8 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold text-black dark:text-white mb-4">
                   Criar conta
                 </h2>
-                <CompletRegister />
-                {/* <RegistrationForm /> */}
+                {/* <CompletRegister /> */}
+                <RegistrationForm />
                 <div className="text-center text-sm text-muted-foreground mt-4">
                   Já tem uma conta?{" "}
                   <button
@@ -881,7 +929,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     className="text-blue-600 hover:text-blue-500 font-medium"
-                    onClick={() => setIsRegistering(true)}
+                    onClick={() => router.replace("/auth/signup")}
                   >
                     Criar conta
                   </button>
