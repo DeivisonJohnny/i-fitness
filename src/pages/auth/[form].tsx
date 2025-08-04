@@ -33,6 +33,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import UserApi from "@/service/Api/UserApi";
 
 type FormRegisterUser = {
   name: string;
@@ -104,8 +105,6 @@ function RegistrationForm() {
     mode: "onChange",
   });
 
-  const router = useRouter();
-
   const handleNext = async (fields: (keyof FormRegisterUser)[] = []) => {
     const isStepValid = await trigger(fields);
     if (isStepValid) {
@@ -148,15 +147,18 @@ function RegistrationForm() {
     }),
   };
 
-  const onSubmit = (data: FormRegisterUser) => {
-    console.log("Dados válidos:", data);
-    // Aqui você pode chamar API, cadastrar usuário, etc.
+  const handleRegisterUser = async (data: FormRegisterUser) => {
+    try {
+      const response = await UserApi.create(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <>
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(handleRegisterUser)}
         className="relative min-h-[250px] overflow-hidden space-y-4  "
       >
         <AnimatePresence mode="wait" custom={direction}>
