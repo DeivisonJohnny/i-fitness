@@ -8,20 +8,20 @@ datasource db {
 }
 
 model User {
-  id                      String                @id @default(uuid())
+  id                      String                 @id @default(uuid())
   name                    String
   surname                 String
-  email                   String                @unique
+  email                   String                 @unique
   password                String
-  sex                     Sex
-  born                    DateTime
-  height                  Int
-  weight                  Float
-  profession              String
-  training_frequency_week Int
-  physical_activity_level PhysicalActivityLevel
-  type_training           TypeTraining
-  objective               Objective
+  sex                     Sex?
+  born                    DateTime?
+  height                  Int?
+  weight                  Float?
+  profession              String?
+  training_frequency_week Int?
+  physical_activity_level PhysicalActivityLevel?
+  type_training           TypeTraining?
+  objective               Objective?
 }
 
 enum Sex {
