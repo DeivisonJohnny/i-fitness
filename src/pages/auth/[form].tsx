@@ -19,6 +19,7 @@ import {
   objectiveOptions,
   physicalActivityLevelOptions,
   sexOptions,
+  typeTrainingOptions,
 } from "@/lib/enums";
 import {
   Select,
@@ -47,7 +48,6 @@ type FormComplementUser = {
   height: number;
   weight: number;
   profession: string;
-  training_frequency_week: string;
   physical_activity_level: string;
   type_training: string;
   objective: string;
@@ -288,9 +288,7 @@ function CompletRegister() {
       .min(3, "O campo deve ter ao menos 3 caracteres")
       .max(30, "O campo deve ter no maximo 30 caracteres")
       .required("O campo deve ser preenchido"),
-    training_frequency_week: yup
-      .string()
-      .required("O campo deve ser preenchido"),
+
     type_training: yup.string().required("O campo deve ser preenchido"),
   });
 
@@ -345,7 +343,7 @@ function CompletRegister() {
   function handleCompletRegister(data: FormComplementUser) {
     console.log("🚀 ~ handleCompletRegister ~ data:", data);
   }
-  console.log(sexOptions);
+
   return (
     <form
       onSubmit={handleSubmit(handleCompletRegister)}
@@ -362,6 +360,42 @@ function CompletRegister() {
             animate="animate"
             exit="exit"
           >
+            <div className="flex flex-col gap-[5px] mb-[10px]">
+              <Label htmlFor="sex">Sexo</Label>
+              <Controller
+                name="sex"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger id="sex" className="w-full">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sexOptions &&
+                        sexOptions.map((sex) => (
+                          <SelectItem key={sex} value={sex}>
+                            {formatEnumLabel(sex)}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.sex && (
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key="sex-error"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="text-red-500 text-sm"
+                  >
+                    {errors.sex.message}
+                  </motion.p>
+                </AnimatePresence>
+              )}
+            </div>
             <div className="flex flex-col gap-[5px]">
               <Label htmlFor="born">Data de Nascimento</Label>
               <Input id="born" {...register("born")} type="date" />
@@ -441,129 +475,163 @@ function CompletRegister() {
             exit="exit"
           >
             <div className="flex flex-col gap-[5px]">
-              <Label htmlFor="sex">Sexo</Label>
-              <Controller
-                name="sex"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger id="sex" className="w-full">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sexOptions &&
-                        sexOptions.map((sex) => (
-                          <SelectItem key={sex} value={sex}>
-                            {formatEnumLabel(sex)}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.sex && (
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key="sex-error"
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.3 }}
-                    className="text-red-500 text-sm"
-                  >
-                    {errors.sex.message}
-                  </motion.p>
-                </AnimatePresence>
-              )}
-            </div>
-            <div className="flex flex-col gap-[5px]">
-              <Label htmlFor="physical_activity_level" className="mt-4">
-                Nível de atividade
-              </Label>
-              <Controller
-                name="physical_activity_level"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger
-                      id="physical_activity_level"
-                      className="w-full"
-                    >
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {physicalActivityLevelOptions &&
-                        Object.entries(physicalActivityLevelOptions).map(
-                          ([valueKey, description]) => (
-                            <SelectItem key={valueKey} value={valueKey}>
-                              <Tooltip>
-                                <TooltipTrigger className="w-full h-full ">
-                                  {formatEnumLabel(valueKey)}
-                                </TooltipTrigger>
-                                <TooltipContent className="z-[50]">
-                                  {description}
-                                </TooltipContent>
-                              </Tooltip>
+              <div className="flex flex-col gap-[5px]">
+                <Label htmlFor="objective" className="mt-4">
+                  Objetivo
+                </Label>
+                <Controller
+                  name="objective"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger id="objective" className="w-full">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {objectiveOptions &&
+                          objectiveOptions.map((objective) => (
+                            <SelectItem key={objective} value={objective}>
+                              {formatEnumLabel(objective)}
                             </SelectItem>
-                          )
-                        )}
-                    </SelectContent>
-                  </Select>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.objective && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="objective-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.objective.message}
+                    </motion.p>
+                  </AnimatePresence>
                 )}
-              />
-              {errors.physical_activity_level && (
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key="physical-activity-error"
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.3 }}
-                    className="text-red-500 text-sm"
-                  >
-                    {errors.physical_activity_level.message}
-                  </motion.p>
-                </AnimatePresence>
-              )}
-            </div>
-            <div className="flex flex-col gap-[5px]">
-              <Label htmlFor="objective" className="mt-4">
-                Objetivo
-              </Label>
-              <Controller
-                name="objective"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger id="objective" className="w-full">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {objectiveOptions &&
-                        objectiveOptions.map((objective) => (
-                          <SelectItem key={objective} value={objective}>
-                            {formatEnumLabel(objective)}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+              </div>
+
+              <div className="flex flex-col gap-[5px]">
+                <Label htmlFor="profession" className="mt-4">
+                  Profissão
+                </Label>
+
+                <Input
+                  id="profession"
+                  {...register("profession")}
+                  placeholder="Ex: Desenvolvedor, Vendedor, Pedreiro"
+                  type="text"
+                />
+                {errors.profession && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="profession-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.profession.message}
+                    </motion.p>
+                  </AnimatePresence>
                 )}
-              />
-              {errors.objective && (
-                <AnimatePresence mode="wait">
-                  <motion.p
-                    key="objective-error"
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.3 }}
-                    className="text-red-500 text-sm"
-                  >
-                    {errors.objective.message}
-                  </motion.p>
-                </AnimatePresence>
-              )}
+              </div>
+
+              <div className="flex flex-col gap-[5px]">
+                <Label htmlFor="physical_activity_level" className="mt-4">
+                  Nível de atividade
+                </Label>
+                <Controller
+                  name="physical_activity_level"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger
+                        id="physical_activity_level"
+                        className="w-full"
+                      >
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {physicalActivityLevelOptions &&
+                          Object.entries(physicalActivityLevelOptions).map(
+                            ([valueKey, description]) => (
+                              <SelectItem key={valueKey} value={valueKey}>
+                                <Tooltip>
+                                  <TooltipTrigger className="w-full h-full ">
+                                    {formatEnumLabel(valueKey)}
+                                  </TooltipTrigger>
+                                  <TooltipContent className="z-[50]">
+                                    {description}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </SelectItem>
+                            )
+                          )}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.physical_activity_level && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="physical-activity-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.physical_activity_level.message}
+                    </motion.p>
+                  </AnimatePresence>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-[5px]">
+                <Label htmlFor="type_training" className="mt-4">
+                  Tipo de atividade fisica
+                </Label>
+                <Controller
+                  name="type_training"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger id="type_training" className="w-full">
+                        <SelectValue placeholder="Nenhuma" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {typeTrainingOptions &&
+                          typeTrainingOptions.map((item) => (
+                            <SelectItem key={item} value={item}>
+                              {formatEnumLabel(item)}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.type_training && (
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key="physical-activity-error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-red-500 text-sm"
+                    >
+                      {errors.type_training.message}
+                    </motion.p>
+                  </AnimatePresence>
+                )}
+              </div>
             </div>
+
             <div className="flex flex-col justify-between gap-2 mt-4">
               <Button
                 type="button"
@@ -572,7 +640,11 @@ function CompletRegister() {
               >
                 Voltar
               </Button>
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full"
+                onClick={() => console.log(errors)}
+              >
                 Cadastrar
               </Button>
             </div>

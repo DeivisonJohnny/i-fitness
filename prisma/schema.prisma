@@ -39,14 +39,13 @@ enum PhysicalActivityLevel {
 }
 
 enum Objective {
-  Sedentario          @map("1.2")
-  Levemente_Ativo     @map("1.375")
-  Moderadamente_Ativo @map("1.55")
-  Muito_Ativo         @map("1.725")
-  Extremamente_Ativo  @map("1.9")
+  Perder_peso  @map("Perder peso")
+  Manter_peso  @map("Manter peso")
+  Ganhar_massa @map("Ganhar massa")
 }
 
 enum TypeTraining {
+  Nenhuma               @map("Nenhuma")
   Musculacao            @map("Musculação")
   Cardio_Aerobico       @map("Cardio / Aeróbico")
   Treinamento_Funcional @map("Treinamento funcional")
