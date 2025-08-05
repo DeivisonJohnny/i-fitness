@@ -1,6 +1,3 @@
-import styled from "styled-components";
-import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { SidebarTrigger } from "../ui/sidebar";
 import { ThemeToggle } from "../ui/them-toggle";
@@ -30,17 +27,3 @@ export default function Header() {
     </>
   );
 }
-
-const ContainerHeader = styled.header`
-  width: 85%;
-  margin: auto;
-  position: sticky;
-  top: 20px;
-  border-radius: 75px;
-  background-color: #1a1a1a6a;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(100px);
-  box-shadow: 0px 5px 15px #00000088;
-  border: none;
-  z-index: 100;
-`;

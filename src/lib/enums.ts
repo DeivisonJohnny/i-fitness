@@ -1,9 +1,4 @@
-import {
-  Objective,
-  PhysicalActivityLevel,
-  Sex,
-  TypeTraining,
-} from "@prisma/client";
+import { Objective, Sex, TypeTraining } from "@prisma/client";
 
 export enum PhysicalActivityLevelEnum {
   Sedentario = "Sedentario",

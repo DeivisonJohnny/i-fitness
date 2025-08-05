@@ -6,7 +6,7 @@ import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -313,11 +313,7 @@ function RegistrationForm() {
   );
 }
 
-interface CompletRegisterProps {
-  idUser: string;
-}
-
-function CompletRegister({ idUser }: CompletRegisterProps) {
+function CompletRegister() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<"next" | "back">("next");
   const router = useRouter();
@@ -411,11 +407,18 @@ function CompletRegister({ idUser }: CompletRegisterProps) {
       if (userUpdated) {
         router.push("/dashboard");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.log("🚀 ~ handleCompletRegister ~ error:", error);
-      toast("Erro ao atualizar o cadastro", {
-        description: error.message,
-      });
+
+      if (error instanceof Error) {
+        toast("Erro ao atualizar o cadastro", {
+          description: error.message,
+        });
+      } else {
+        toast("Erro ao atualizar o cadastro", {
+          description: "Erro desconhecido",
+        });
+      }
     }
   }
 
@@ -871,7 +874,7 @@ export default function AuthPage() {
                 <h2 className="text-2xl font-bold text-black dark:text-white mb-4">
                   Complete seu cadastro
                 </h2>
-                <CompletRegister idUser={user.id} />
+                <CompletRegister />
               </>
             ) : (
               <>

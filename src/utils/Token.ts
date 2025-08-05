@@ -23,14 +23,21 @@ export default class Token {
     try {
       const { payload } = await jwtVerify(token, secret);
       return payload as unknown as T;
-    } catch (error: any) {
-      if (tokenError) {
-        if (error.code === "ERR_JWT_EXPIRED" && tokenError.expired) {
-          throw tokenError.expired;
-        }
+    } catch (error: unknown) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        typeof error.code === "string"
+      ) {
+        if (tokenError) {
+          if (error.code === "ERR_JWT_EXPIRED" && tokenError.expired) {
+            throw tokenError.expired;
+          }
 
-        if (tokenError.invalid) {
-          throw tokenError.invalid;
+          if (tokenError.invalid) {
+            throw tokenError.invalid;
+          }
         }
       }
 

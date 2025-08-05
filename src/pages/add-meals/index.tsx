@@ -4,12 +4,9 @@ import React, { useState, useRef } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Camera,
   Upload,
   Sparkles,
-  Bot,
-  Loader2,
   Utensils,
   Clock,
   BookOpen,
@@ -95,43 +92,43 @@ export default function AddMeals() {
     }
   };
 
-  const handleEstimateNutrients = async () => {
-    if (!mealData.imageFile && !mealData.description.trim()) {
-      toast.error("Campos Obrigatórios", {
-        description:
-          "Por favor, envie uma imagem ou descreva a refeição para estimar.",
-      });
-      return;
-    }
+  // const handleEstimateNutrients = async () => {
+  //   if (!mealData.imageFile && !mealData.description.trim()) {
+  //     toast.error("Campos Obrigatórios", {
+  //       description:
+  //         "Por favor, envie uma imagem ou descreva a refeição para estimar.",
+  //     });
+  //     return;
+  //   }
 
-    setEstimationState("loading");
-    setEstimatedNutrients({});
-    setShowManualInput(false);
+  //   setEstimationState("loading");
+  //   setEstimatedNutrients({});
+  //   setShowManualInput(false);
 
-    // Simula processamento da IA
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+  //   // Simula processamento da IA
+  //   await new Promise((resolve) => setTimeout(resolve, 2500));
 
-    // Simula resultado (80% sucesso)
-    if (Math.random() > 0.2) {
-      setEstimatedNutrients({
-        calories: Math.floor(Math.random() * 600) + 300,
-        protein: Math.floor(Math.random() * 40) + 15,
-        carbs: Math.floor(Math.random() * 80) + 30,
-        fat: Math.floor(Math.random() * 30) + 10,
-      });
-      setEstimationState("success");
-      toast("Estimativa Concluída!", {
-        description: "Nutrientes estimados com sucesso pela IA.",
-      });
-    } else {
-      setEstimationState("error");
-      toast("Erro na Estimativa", {
-        description:
-          "Não foi possível estimar os nutrientes. Tente novamente ou insira os dados manualmente abaixo.",
-      });
-      setShowManualInput(true);
-    }
-  };
+  //   // Simula resultado (80% sucesso)
+  //   if (Math.random() > 0.2) {
+  //     setEstimatedNutrients({
+  //       calories: Math.floor(Math.random() * 600) + 300,
+  //       protein: Math.floor(Math.random() * 40) + 15,
+  //       carbs: Math.floor(Math.random() * 80) + 30,
+  //       fat: Math.floor(Math.random() * 30) + 10,
+  //     });
+  //     setEstimationState("success");
+  //     toast("Estimativa Concluída!", {
+  //       description: "Nutrientes estimados com sucesso pela IA.",
+  //     });
+  //   } else {
+  //     setEstimationState("error");
+  //     toast("Erro na Estimativa", {
+  //       description:
+  //         "Não foi possível estimar os nutrientes. Tente novamente ou insira os dados manualmente abaixo.",
+  //     });
+  //     setShowManualInput(true);
+  //   }
+  // };
 
   const handleSaveMeal = () => {
     if (!mealData.type || !mealData.description.trim() || !mealData.time) {

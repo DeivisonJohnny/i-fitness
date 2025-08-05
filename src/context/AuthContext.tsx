@@ -43,6 +43,8 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const publicPaths = ["/auth/[form]", "/public"];
+
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,8 +53,9 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const pathname = router.pathname;
 
-  const publicPaths = ["/auth/[form]", "/public"];
-  const isPublicPage = publicPaths.some((path) => pathname.startsWith(path));
+  const isPublicPage = useMemo(() => {
+    return publicPaths.some((path) => pathname.startsWith(path));
+  }, [pathname]);
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);
@@ -61,7 +64,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     if (!isPublicPage) {
       router.replace("/auth/login");
     }
-  }, [router]);
+  }, [router, isPublicPage]);
 
   const isRegisterComplet = useMemo(() => {
     if (user) {
@@ -73,8 +76,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   }, [user]);
 
   useEffect(() => {
-    const isPublicPage = publicPaths.some((path) => pathname.startsWith(path));
-
     if (isPublicPage) {
       setLoading(false);
     }
@@ -113,10 +114,16 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             setIsAuthenticated(true);
           }
         }
-      } catch (err: any) {
-        console.error("Erro de autenticação:", err.message);
+      } catch (err: unknown) {
+        let errorMessage = "Erro desconhecido";
+
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        }
+
+        console.error("Erro de autenticação:", errorMessage);
         toast("Erro na autenticação", {
-          description: err.message,
+          description: errorMessage,
         });
         logout();
       } finally {
@@ -125,7 +132,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     };
 
     checkAuth();
-  }, [router.isReady]);
+  }, [router.isReady, logout, user, isRegisterComplet, isPublicPage]);
 
   useEffect(() => {
     if (user && !isRegisterComplet && !isPublicPage) {
