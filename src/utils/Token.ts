@@ -1,4 +1,5 @@
-import jwt, { TokenExpiredError } from "jsonwebtoken";
+import { differenceInSeconds } from "date-fns";
+import { SignJWT, jwtVerify, decodeJwt } from "jose";
 import { KEY_SECRET_JWT } from "./Constant";
 
 type TokenError = {
@@ -6,17 +7,25 @@ type TokenError = {
   invalid?: Error;
 };
 
+const encoder = new TextEncoder();
+const secret = encoder.encode(KEY_SECRET_JWT);
+
 export default class Token {
   static async create<T>(payload: Record<string, T>, expiresIn: number = 10) {
-    return jwt.sign(payload, KEY_SECRET_JWT, { expiresIn: 60 * expiresIn });
+    const jwt = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "HS256" })
+      .setExpirationTime(`${expiresIn * 60}s`)
+      .sign(secret);
+    return jwt;
   }
 
-  static getData<T>(token: string, tokenError?: TokenError): T {
+  static async getData<T>(token: string, tokenError?: TokenError): Promise<T> {
     try {
-      return jwt.verify(token, KEY_SECRET_JWT) as Record<string, unknown> as T;
-    } catch (error) {
+      const { payload } = await jwtVerify(token, secret);
+      return payload as unknown as T;
+    } catch (error: any) {
       if (tokenError) {
-        if (error instanceof TokenExpiredError && tokenError.expired) {
+        if (error.code === "ERR_JWT_EXPIRED" && tokenError.expired) {
           throw tokenError.expired;
         }
 
@@ -27,5 +36,12 @@ export default class Token {
 
       throw error;
     }
+  }
+
+  static expiration(token: string) {
+    const data = decodeJwt(token) as { exp?: number };
+    if (!data || !data.exp) return 0;
+
+    return differenceInSeconds(data.exp * 1000, new Date());
   }
 }
