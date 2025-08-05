@@ -6,11 +6,8 @@ import { Toaster } from "sonner";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <>
-      <Toaster position="top-right" theme="dark" />
-      <AuthProvider>
-        <Component {...pageProps} />
-      </AuthProvider>
-    </>
+    <AuthProvider>
+      <Component {...pageProps} />
+    </AuthProvider>
   );
 }

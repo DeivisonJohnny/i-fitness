@@ -6,7 +6,7 @@ import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +34,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import UserApi from "@/service/Api/UserApi";
+import Storage from "@/utils/Storage";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 type FormRegisterUser = {
   name: string;
@@ -43,7 +46,7 @@ type FormRegisterUser = {
   confirmPassword: string;
 };
 
-type FormComplementUser = {
+export type FormComplementUser = {
   sex: string;
   born: Date;
   height: number;
@@ -149,7 +152,11 @@ function RegistrationForm() {
 
   const handleRegisterUser = async (data: FormRegisterUser) => {
     try {
-      const response = await UserApi.create(data);
+      const { token } = await UserApi.create(data);
+
+      if (token) {
+        Storage.set("token_auth", token);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -306,9 +313,14 @@ function RegistrationForm() {
   );
 }
 
-function CompletRegister() {
+interface CompletRegisterProps {
+  idUser: string;
+}
+
+function CompletRegister({ idUser }: CompletRegisterProps) {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<"next" | "back">("next");
+  const router = useRouter();
 
   const validationSchemaComplement = yup.object().shape({
     sex: yup.string().required("Campo obrigatório"),
@@ -390,8 +402,21 @@ function CompletRegister() {
     }),
   };
 
-  function handleCompletRegister(data: FormComplementUser) {
+  async function handleCompletRegister(data: FormComplementUser) {
     console.log("🚀 ~ handleCompletRegister ~ data:", data);
+
+    try {
+      const userUpdated = await UserApi.update(data);
+      console.log("🚀 ~ handleCompletRegister ~ userUpdated:", userUpdated);
+      if (userUpdated) {
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      console.log("🚀 ~ handleCompletRegister ~ error:", error);
+      toast("Erro ao atualizar o cadastro", {
+        description: error.message,
+      });
+    }
   }
 
   return (
@@ -711,12 +736,16 @@ export default function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toggleTheme } = useTheme();
-  const [isRegistering, setIsRegistering] = useState(false);
+  const [typeForm, setTypeForm] = useState<
+    "signup" | "login" | "complet" | string
+  >("login");
+
+  const { user } = useAuth();
 
   const router = useRouter();
 
   useEffect(() => {
-    setIsRegistering(router.query.form == "signup");
+    setTypeForm(router.query.form as string);
   }, [router.query.form]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -820,23 +849,29 @@ export default function AuthPage() {
               </div>
             </div>
 
-            {isRegistering ? (
+            {typeForm == "signup" ? (
               <>
                 <h2 className="text-2xl font-bold text-black dark:text-white mb-4">
                   Criar conta
                 </h2>
-                {/* <CompletRegister /> */}
                 <RegistrationForm />
                 <div className="text-center text-sm text-muted-foreground mt-4">
                   Já tem uma conta?{" "}
                   <button
                     type="button"
                     className="text-blue-600 hover:text-blue-500 font-medium"
-                    onClick={() => setIsRegistering(false)}
+                    onClick={() => setTypeForm("login")}
                   >
                     Entrar
                   </button>
                 </div>
+              </>
+            ) : typeForm == "complet" && user ? (
+              <>
+                <h2 className="text-2xl font-bold text-black dark:text-white mb-4">
+                  Complete seu cadastro
+                </h2>
+                <CompletRegister idUser={user.id} />
               </>
             ) : (
               <>
