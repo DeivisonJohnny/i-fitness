@@ -9,6 +9,7 @@ export default function routes(
   api.use(bodyParser);
 
   api.post("/user", UserController.createUser);
+  api.post("/user/me", UserController.authMe);
 
   return api;
 }
