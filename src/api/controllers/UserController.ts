@@ -23,13 +23,17 @@ export default class UserController {
       const newUser = await Prisma.user.create({
         data: { name, surname, email, password: await Util.hash(password) },
         select: {
+          id: true,
           name: true,
           surname: true,
           email: true,
         },
       });
 
-      const token = await Token.create({ email: newUser.email });
+      const token = await Token.create({
+        email: newUser.email,
+        id: newUser.id,
+      });
 
       return res.json({ token });
     } catch (error) {
@@ -72,7 +76,6 @@ export default class UserController {
           weight: true,
           objective: true,
           physical_activity_level: true,
-          training_frequency_week: true,
           type_training: true,
         },
       });
@@ -81,6 +84,30 @@ export default class UserController {
     } catch (error) {
       console.log(error);
       return res.json({ message: error });
+    }
+  }
+
+  static async updateUser(req: NextApiRequest, res: NextApiResponse) {
+    const userForUpdate = req.body;
+    const id = req.userId;
+
+    try {
+      if (!userForUpdate) {
+        throw new ApiError("Dados não recebidos");
+      }
+      const userUpdated = await Prisma.user.update({
+        where: {
+          id: id,
+        },
+
+        data: {
+          ...userForUpdate,
+        },
+      });
+
+      return res.json(userUpdated);
+    } catch (error) {
+      return res.json(error);
     }
   }
 }

@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
 import Api from ".";
+import { FormComplementUser } from "@/pages/auth/[form]";
 
 export default class UserApi {
   static async create(data: Partial<User>): Promise<{ token: string }> {
@@ -11,5 +12,9 @@ export default class UserApi {
     token: string;
   }): Promise<User | null> {
     return Api.post("/user/me", data);
+  }
+
+  static async update(data: User | FormComplementUser) {
+    return Api.put("/user", data);
   }
 }

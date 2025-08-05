@@ -7,10 +7,10 @@ import {
 
 export enum PhysicalActivityLevelEnum {
   Sedentario = "Sedentario",
-  LevementeAtivo = "Levemente_ativo",
-  ModeradamenteAtivo = "Moderadamente_ativo",
+  LevementeAtivo = "Levemente_Ativo",
+  ModeradamenteAtivo = "Moderadamente_Ativo",
   MuitoAtivo = "Muito_Ativo",
-  ExtremamenteAtivo = "Extremamente_ativo",
+  ExtremamenteAtivo = "Extremamente_Ativo",
 }
 export const physicalActivityLevelOptions: Record<
   PhysicalActivityLevelEnum,

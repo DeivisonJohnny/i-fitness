@@ -14,9 +14,12 @@ import {
   useState,
   useCallback,
   Suspense,
+  useMemo,
 } from "react";
 import { LoadingOutlined } from "@ant-design/icons";
 import { toast } from "sonner";
+import Api from "@/service/Api";
+import { Toaster } from "@/components/ui/sonner";
 
 function Loader() {
   return (
@@ -32,7 +35,9 @@ interface AuthContextProps {
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+export const AuthContext = createContext<AuthContextProps | undefined>(
+  undefined
+);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -58,6 +63,15 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [router]);
 
+  const isRegisterComplet = useMemo(() => {
+    if (user) {
+      return Object.values(user).every(
+        (value) => value !== null && value !== undefined
+      );
+    }
+    return null;
+  }, [user]);
+
   useEffect(() => {
     const isPublicPage = publicPaths.some((path) => pathname.startsWith(path));
 
@@ -77,7 +91,9 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             });
           }
 
-          if (token) {
+          if ((token && !user) || (token && user && !isRegisterComplet)) {
+            Api.defaults.headers.Authorization = `Bearer ${token}`;
+
             const { email }: { email: string } = await Token.getData(token, {
               expired: new Error(
                 "Sua sessão expirou. Por favor, faça login novamente."
@@ -110,19 +126,32 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
     checkAuth();
   }, [router.isReady]);
+
+  useEffect(() => {
+    if (user && !isRegisterComplet && !isPublicPage) {
+      router.replace("/auth/complet");
+    }
+  }, [user, isRegisterComplet, isPublicPage, router]);
+
   if (loading) {
     return <Loader />;
   }
 
-  if (!isAuthenticated && !isPublicPage) {
-    return <AuthPage />;
-  }
+  // if (!isAuthenticated && !isPublicPage) {
+  //   return <AuthPage />;
+  // }
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, logout, user }}>
-      <Layout>
-        <Suspense fallback={<Loader />}>{children}</Suspense>
-      </Layout>
+      {!isAuthenticated && !isPublicPage ? (
+        <AuthPage />
+      ) : (
+        <Layout>
+          <Toaster position="top-right" theme="dark" />
+
+          <Suspense fallback={<Loader />}>{children}</Suspense>
+        </Layout>
+      )}
     </AuthContext.Provider>
   );
 }

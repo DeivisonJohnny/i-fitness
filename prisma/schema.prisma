@@ -18,7 +18,6 @@ model User {
   height                  Int?
   weight                  Float?
   profession              String?
-  training_frequency_week Int?
   physical_activity_level PhysicalActivityLevel?
   type_training           TypeTraining?
   objective               Objective?
