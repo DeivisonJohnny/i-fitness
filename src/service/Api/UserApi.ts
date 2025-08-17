@@ -17,4 +17,11 @@ export default class UserApi {
   static async update(data: User | FormComplementUser) {
     return Api.put("/user", data);
   }
+
+  static async auth(data: {
+    email: string;
+    password: string;
+  }): Promise<{ token: string }> {
+    return Api.post("/user/auth", data);
+  }
 }

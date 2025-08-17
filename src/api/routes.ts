@@ -10,8 +10,9 @@ export default function routes(
   api.use(bodyParser);
 
   api.post("/user", UserController.createUser);
-  api.post("/user/me", auth(), UserController.authMe);
+  api.post("/user/me", auth(), UserController.findMe);
   api.put("/user", auth(), UserController.updateUser);
+  api.post("/user/auth", UserController.auth);
 
   return api;
 }

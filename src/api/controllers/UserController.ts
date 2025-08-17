@@ -42,7 +42,7 @@ export default class UserController {
     }
   }
 
-  static async authMe(req: NextApiRequest, res: NextApiResponse) {
+  static async findMe(req: NextApiRequest, res: NextApiResponse) {
     const { email, token } = req.body;
 
     try {
@@ -108,6 +108,63 @@ export default class UserController {
       return res.json(userUpdated);
     } catch (error) {
       return res.json(error);
+    }
+  }
+
+  static async auth(req: NextApiRequest, res: NextApiResponse) {
+    const { email, password: passwordInput } = req.body;
+
+    if (!email || !passwordInput) {
+      return new Error("Autenticação falhou por falta de dados");
+    }
+
+    try {
+      const userWithPassword = await Prisma.user.findUnique({
+        where: {
+          email: email,
+        },
+        select: {
+          id: true,
+          name: true,
+          surname: true,
+          email: true,
+          born: true,
+          height: true,
+          objective: true,
+          physical_activity_level: true,
+          profession: true,
+          sex: true,
+          type_training: true,
+          weight: true,
+          password: true,
+        },
+      });
+
+      if (!userWithPassword) {
+        throw new Error("Usuario inválido");
+      }
+
+      const { password, ...user } = userWithPassword;
+      const checkPassword = await Util.checkHash(passwordInput, password);
+
+      if (!password || !checkPassword) {
+        throw new Error("Usuario e/ou senha inválida");
+      }
+
+      const token = await Token.create(
+        { id: user.id, email: user.email },
+        60 * 8
+      );
+
+      if (!token) {
+        throw new Error("Erro inesperado ao criar o token de autenticação");
+      }
+
+      return res.json({ user, token });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Ocorreu um erro inesperado no servidor." });
     }
   }
 }

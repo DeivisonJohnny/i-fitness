@@ -37,6 +37,7 @@ import UserApi from "@/service/Api/UserApi";
 import Storage from "@/utils/Storage";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { TOKEN_KEY } from "@/utils/Constant";
 
 type FormRegisterUser = {
   name: string;
@@ -733,6 +734,11 @@ function CompletRegister() {
   );
 }
 
+type Login = {
+  email: string;
+  password: string;
+};
+
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -747,16 +753,43 @@ export default function AuthPage() {
 
   const router = useRouter();
 
+  const validationLoginSchema = yup.object().shape({
+    email: yup
+      .string()
+      .email("Email inválido")
+      .required("O campo deve ser preenchido"),
+    password: yup.string().min(8, "Deve ter no minimo 8 caracteres").required(),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Login>({
+    resolver: yupResolver(validationLoginSchema),
+    mode: "onChange",
+  });
+
   useEffect(() => {
     setTypeForm(router.query.form as string);
   }, [router.query.form]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log("Login:", { email, password });
-    setIsLoading(false);
+  const handleLogin = async (data: Login) => {
+    try {
+      const { token } = await UserApi.auth(data);
+
+      if (token) {
+        Storage.set(TOKEN_KEY, token);
+        router.replace("/dashboard");
+      }
+    } catch (error) {
+      console.log(error);
+      if (error instanceof Error) {
+        toast("Erro na autenticação", {
+          description: error.message,
+        });
+      }
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -878,8 +911,11 @@ export default function AuthPage() {
               </>
             ) : (
               <>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
+                <form
+                  onSubmit={handleSubmit(handleLogin)}
+                  className="space-y-4"
+                >
+                  <div className="flex flex-col gap-[5px]">
                     <Label
                       htmlFor="email"
                       className="text-sm font-medium text-black dark:text-white "
@@ -889,18 +925,29 @@ export default function AuthPage() {
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
+                        {...register("email")}
                         id="email"
-                        type="email"
                         placeholder="seu@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
                         className="pl-10 h-12 text-gray-900 dark:text-gray-300 "
-                        required
                       />
                     </div>
+                    {errors.email && (
+                      <AnimatePresence mode="wait">
+                        <motion.p
+                          key="email-error"
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-red-500 text-sm"
+                        >
+                          {errors.email.message}
+                        </motion.p>
+                      </AnimatePresence>
+                    )}
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-[5px]">
                     <Label
                       htmlFor="password"
                       className="text-sm font-medium text-black dark:text-white "
@@ -910,20 +957,31 @@ export default function AuthPage() {
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
+                        {...register("password")}
                         id="password"
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
                         className="pl-10 h-12 text-gray-900 dark:text-gray-300 "
-                        required
                       />
+                      {errors.password && (
+                        <AnimatePresence mode="wait">
+                          <motion.p
+                            key="password-error"
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            transition={{ duration: 0.3 }}
+                            className="text-red-500 text-sm"
+                          >
+                            {errors.password.message}
+                          </motion.p>
+                        </AnimatePresence>
+                      )}
                       <Button
-                        type="button"
+                        type="submit"
                         variant="ghost"
                         size="sm"
                         className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4 text-muted-foreground" />
