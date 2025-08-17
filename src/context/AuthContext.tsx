@@ -61,11 +61,13 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     setIsAuthenticated(false);
     setUser(null);
     Storage.remove(TOKEN_KEY);
+    Api.defaults.headers.Authorization = ""; // Limpa o header da API
     if (!isPublicPage) {
       router.replace("/auth/login");
     }
   }, [router, isPublicPage]);
 
+  // Este useMemo continua útil para o resto da aplicação
   const isRegisterComplet = useMemo(() => {
     if (user) {
       return Object.values(user).every(
@@ -78,49 +80,52 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (isPublicPage) {
       setLoading(false);
+      return; // Interrompe a execução se a página for pública
     }
 
     const checkAuth = async () => {
       try {
-        if (!isPublicPage) {
-          const token = Storage.get(TOKEN_KEY, null);
+        const token = Storage.get(TOKEN_KEY, null);
 
-          if (!token && !isPublicPage) {
-            logout();
-            toast("Erro na autenticação", {
-              description: "Token não encontrado. Por favor, faça o login.",
-            });
+        if (!token) {
+          toast("Erro na autenticação", {
+            description: "Token não encontrado. Por favor, faça o login.",
+          });
+          logout();
+          return;
+        }
+
+        if (token) {
+          Api.defaults.headers.Authorization = `Bearer ${token}`;
+
+          const { email }: { email: string } = await Token.getData(token, {
+            expired: new Error(
+              "Sua sessão expirou. Por favor, faça login novamente."
+            ),
+            invalid: new Error("Token inválido."),
+          });
+
+          const me = await UserApi.me({ email, token });
+
+          if (!me) {
+            throw new Error("Falha ao obter dados do usuário.");
           }
 
-          if ((token && !user) || (token && user && !isRegisterComplet)) {
-            Api.defaults.headers.Authorization = `Bearer ${token}`;
-
-            const { email }: { email: string } = await Token.getData(token, {
-              expired: new Error(
-                "Sua sessão expirou. Por favor, faça login novamente."
-              ),
-              invalid: new Error("Token inválido."),
-            });
-
-            const me = await UserApi.me({ email, token });
-
-            if (!me) {
-              throw new Error("Falha ao obter dados do usuário.");
-            }
-
-            console.log(me);
-
-            setUser(me);
-            setIsAuthenticated(true);
+          const isRegisterCompleteForMe = Object.values(me).every(
+            (value) => value !== null && value !== undefined
+          );
+          if (!isRegisterCompleteForMe && !isPublicPage) {
+            router.replace("/auth/complet");
           }
+
+          setUser(me);
+          setIsAuthenticated(true);
         }
       } catch (err: unknown) {
         let errorMessage = "Erro desconhecido";
-
         if (err instanceof Error) {
           errorMessage = err.message;
         }
-
         console.error("Erro de autenticação:", errorMessage);
         toast("Erro na autenticação", {
           description: errorMessage,
@@ -131,22 +136,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
-    checkAuth();
-  }, [router.isReady, logout, user, isRegisterComplet, isPublicPage]);
-
-  useEffect(() => {
-    if (user && !isRegisterComplet && !isPublicPage) {
-      router.replace("/auth/complet");
+    if (router.isReady) {
+      checkAuth();
     }
-  }, [user, isRegisterComplet, isPublicPage, router]);
+  }, [router.isReady, isPublicPage, logout]);
 
   if (loading) {
     return <Loader />;
   }
-
-  // if (!isAuthenticated && !isPublicPage) {
-  //   return <AuthPage />;
-  // }
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, logout, user }}>
@@ -155,7 +152,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       ) : (
         <Layout>
           <Toaster position="top-right" theme="dark" />
-
           <Suspense fallback={<Loader />}>{children}</Suspense>
         </Layout>
       )}
