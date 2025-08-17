@@ -19,8 +19,10 @@ export default function Layout({ children }: Props) {
   const initialPage = pathname === "/";
   const isLoginPage = pathname === "/auth/login";
   const isSignupPage = pathname === "/auth/signup";
+  const isComplet = pathname === "/auth/complet";
 
-  const showSidebar = !initialPage && !isLoginPage && !isSignupPage;
+  const showSidebar =
+    !initialPage && !isLoginPage && !isSignupPage && !isComplet;
 
   function LoadPage() {
     return (

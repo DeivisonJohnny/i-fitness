@@ -8,8 +8,10 @@ export default function Header() {
   const initialPage = pathname === "/";
   const isLoginPage = pathname === "/auth/login";
   const isSignupPage = pathname === "/auth/signup";
+  const isComplet = pathname === "/auth/complet";
 
-  const showSidebar = !initialPage && !isLoginPage && !isSignupPage;
+  const showSidebar =
+    !initialPage && !isLoginPage && !isSignupPage && !isComplet;
 
   return (
     <>
