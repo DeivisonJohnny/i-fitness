@@ -67,16 +67,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   }, [router, isPublicPage]);
 
-  // Este useMemo continua útil para o resto da aplicação
-  const isRegisterComplet = useMemo(() => {
-    if (user) {
-      return Object.values(user).every(
-        (value) => value !== null && value !== undefined
-      );
-    }
-    return null;
-  }, [user]);
-
   useEffect(() => {
     if (isPublicPage) {
       setLoading(false);
@@ -139,7 +129,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     if (router.isReady) {
       checkAuth();
     }
-  }, [router.isReady, isPublicPage, logout]);
+  }, [router, isPublicPage, logout]);
 
   if (loading) {
     return <Loader />;

@@ -2,7 +2,7 @@ import { usePathname } from "next/navigation";
 import { SidebarTrigger } from "../ui/sidebar";
 import { ThemeToggle } from "../ui/them-toggle";
 import { Button } from "../ui/button";
-import { LogOut, LogOutIcon } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Header() {

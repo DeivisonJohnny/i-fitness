@@ -162,9 +162,7 @@ export default class UserController {
 
       return res.json({ user, token });
     } catch (error) {
-      return res
-        .status(500)
-        .json({ message: "Ocorreu um erro inesperado no servidor." });
+      return res.status(500).json(error);
     }
   }
 }

@@ -31,7 +31,7 @@ type Login = {
 
 export default function AuthPage() {
   const [showPassword] = useState(false);
-  const [isLoading, _] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toggleTheme } = useTheme();
   const [typeForm, setTypeForm] = useState<
     "signup" | "login" | "complet" | string
@@ -63,6 +63,7 @@ export default function AuthPage() {
   }, [router.query.form]);
 
   const handleLogin = async (data: Login) => {
+    setIsLoading(true);
     try {
       const { token } = await UserApi.auth(data);
 
@@ -77,6 +78,8 @@ export default function AuthPage() {
           description: error.message,
         });
       }
+    } finally {
+      setIsLoading(true);
     }
   };
 

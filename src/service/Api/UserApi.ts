@@ -1,6 +1,6 @@
 import { User } from "@prisma/client";
 import Api from ".";
-import { FormComplementUser } from "@/pages/auth/[form]";
+import { FormComplementUser } from "@/components/RegisterCompletForm";
 
 export default class UserApi {
   static async create(data: Partial<User>): Promise<{ token: string }> {
