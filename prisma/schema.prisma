@@ -21,6 +21,8 @@ model User {
   physical_activity_level PhysicalActivityLevel?
   type_training           TypeTraining?
   objective               Objective?
+
+  meals Meals[]
 }
 
 enum Sex {
@@ -61,4 +63,49 @@ enum TypeTraining {
   Lutas_Artes_Marcial   @map("Lutas / Artes marciais (jiu-jitsu, muay thai, boxe etc.)")
   Treino_Em_Casa        @map("Treino em casa (sem equipamentos)")
   Outros                @map("Outros (campo de texto para personalizar)")
+}
+
+model Meals {
+  id String @id @default(uuid())
+
+  imgUrl      String
+  type        TypesMeal
+  timeMeal    DateTime  @default(now())
+  description String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  nutrients Nutrients?
+}
+
+enum TypesMeal {
+  CAFE_DA_MANHA @map("Café da manhã")
+  ALMOCO        @map("Almoço")
+  JANTAR        @map("Jantar")
+  LANCHE        @map("Lanche")
+  PRE_TREINO    @map("Pré-treino")
+  POS_TREINO    @map("Pós-treino")
+  CEIA          @map("Ceia")
+  OUTRO         @map("Outro")
+}
+
+model Nutrients {
+  id String @id @default(uuid())
+
+  calories      Float
+  carbohydrates Float
+  proteins      Float
+  totalFat      Float
+  fiber         Float
+  sugar         Float
+  sodium        Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  meals   Meals  @relation(fields: [mealsId], references: [id])
+  mealsId String @unique
 }
