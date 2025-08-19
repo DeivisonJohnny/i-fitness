@@ -77,8 +77,13 @@ export default class UserController {
           objective: true,
           physical_activity_level: true,
           type_training: true,
+          physicalAssessment: true,
         },
       });
+
+      if (!user) {
+        throw new Error("A coleta dos dados do usuario falhou");
+      }
 
       return res.json(user);
     } catch (error) {

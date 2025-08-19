@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { PhysicalAssessment, User } from "@prisma/client";
 import Api from ".";
 import { FormComplementUser } from "@/components/RegisterCompletForm";
 
@@ -10,7 +10,7 @@ export default class UserApi {
   static async me(data: {
     email: string;
     token: string;
-  }): Promise<User | null> {
+  }): Promise<User & { physicalAssessment: PhysicalAssessment | null }> {
     return Api.post("/user/me", data);
   }
 

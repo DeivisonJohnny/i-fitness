@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { Part } from "@google-cloud/vertexai";
 import { generativeModel } from "../Vertex";
 
-export class GeminiApiService {
+export class GeminiApi {
   /**
    * Envia um prompt multimodal (texto e imagem) para a API Gemini e retorna a resposta em texto.
    * @param textPrompt O prompt de texto a ser enviado.
@@ -50,5 +50,3 @@ export class GeminiApiService {
     };
   }
 }
-
-// Aqui vai ser feito todos metodos de envio para o gemini IA

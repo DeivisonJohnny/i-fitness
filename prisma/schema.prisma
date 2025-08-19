@@ -22,7 +22,8 @@ model User {
   type_training           TypeTraining?
   objective               Objective?
 
-  meals Meals[]
+  meals              Meals[]
+  physicalAssessment PhysicalAssessment?
 }
 
 enum Sex {
@@ -108,4 +109,31 @@ model Nutrients {
 
   meals   Meals  @relation(fields: [mealsId], references: [id])
   mealsId String @unique
+}
+
+model PhysicalAssessment {
+  id String @id @default(uuid())
+
+  bmi               Float
+  bmiClassification String
+
+  bmr  Int
+  tdee Int
+
+  dailyCaloricTarget            Int
+  dailyCaloricTargetExplanation String @db.Text
+
+  weightGoalRecommendation String @db.Text
+
+  proteinsGrams      Int
+  carbohydratesGrams Int
+  fatsGrams          Int
+
+  generalRecommendations String @db.Text
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

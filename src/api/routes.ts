@@ -3,6 +3,7 @@ import { NextConnect } from "next-connect";
 import UserController from "./controllers/UserController";
 import bodyParser from "./middlewares/BodyParser";
 import auth from "./middlewares/Auth";
+import { PhysicalAssessmentController } from "./controllers/PhysicalAssessmentController";
 
 export default function routes(
   api: NextConnect<NextApiRequest, NextApiResponse>
@@ -13,6 +14,12 @@ export default function routes(
   api.post("/user/me", auth(), UserController.findMe);
   api.put("/user", auth(), UserController.updateUser);
   api.post("/user/auth", UserController.auth);
+
+  api.post(
+    "/assessment",
+    auth(),
+    PhysicalAssessmentController.createPhysicalAssessment
+  );
 
   return api;
 }

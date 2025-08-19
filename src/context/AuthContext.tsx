@@ -20,6 +20,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import { toast } from "sonner";
 import Api from "@/service/Api";
 import { Toaster } from "@/components/ui/sonner";
+import { PhysicalAssessmentApi } from "@/service/Api/PhysicalAssessmentApi";
 
 function Loader() {
   return (
@@ -106,6 +107,10 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           );
           if (!isRegisterCompleteForMe && !isPublicPage) {
             router.replace("/auth/complet");
+          }
+
+          if (!me.physicalAssessment) {
+            const resultAssessment = await PhysicalAssessmentApi.create();
           }
 
           setUser(me);
