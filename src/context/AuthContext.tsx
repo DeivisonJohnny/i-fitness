@@ -96,7 +96,10 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             invalid: new Error("Token inválido."),
           });
 
-          const me = await UserApi.me({ email, token });
+          const { physicalAssessment, ...me } = await UserApi.me({
+            email,
+            token,
+          });
 
           if (!me) {
             throw new Error("Falha ao obter dados do usuário.");
@@ -105,11 +108,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           const isRegisterCompleteForMe = Object.values(me).every(
             (value) => value !== null && value !== undefined
           );
+
           if (!isRegisterCompleteForMe && !isPublicPage) {
             router.replace("/auth/complet");
           }
 
-          if (!me.physicalAssessment) {
+          if (!physicalAssessment) {
             const resultAssessment = await PhysicalAssessmentApi.create();
           }
 
