@@ -100,6 +100,7 @@ export default class UserController {
       if (!userForUpdate) {
         throw new ApiError("Dados não recebidos");
       }
+
       const userUpdated = await Prisma.user.update({
         where: {
           id: id,

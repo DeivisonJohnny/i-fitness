@@ -1,7 +1,15 @@
-import { PhysicalAssessment, User } from "@prisma/client";
+import { PhysicalAssessment, Sex, User } from "@prisma/client";
 import Api from ".";
 import { FormComplementUser } from "@/components/RegisterCompletForm";
 
+export type InformationAccount = {
+  name: string;
+  surname: string;
+  email: string;
+  profession: string;
+  sex: Sex;
+  born: Date;
+};
 export default class UserApi {
   static async create(data: Partial<User>): Promise<{ token: string }> {
     return Api.post("/user", data);
@@ -14,7 +22,7 @@ export default class UserApi {
     return Api.post("/user/me", data);
   }
 
-  static async update(data: User | FormComplementUser) {
+  static async update(data: User | FormComplementUser | InformationAccount) {
     return Api.put("/user", data);
   }
 

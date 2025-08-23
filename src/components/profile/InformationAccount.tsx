@@ -15,7 +15,6 @@ import { Button } from "../ui/button";
 import * as yup from "yup";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Sex } from "@prisma/client";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import {
@@ -26,20 +25,13 @@ import {
   SelectValue,
 } from "../ui/select";
 import { sexOptions } from "@/lib/enums";
-
-type InformationAccount = {
-  name: string;
-  surname: string;
-  email: string;
-  profession: string;
-
-  sex: Sex;
-
-  born: Date;
-};
+import UserApi from "@/service/Api/UserApi";
+import type { InformationAccount } from "@/service/Api/UserApi";
+import { toast } from "sonner";
 
 export default function InformationAccount(props: InformationAccount) {
   const [isEditingAccount, setIsEditingAccount] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -51,7 +43,11 @@ export default function InformationAccount(props: InformationAccount) {
   };
 
   const schemaAccount = yup.object({
-    fullName: yup
+    name: yup
+      .string()
+      .required("Nome é obrigatório")
+      .min(3, "O nome deve ter no mínimo 3 caracteres"),
+    surname: yup
       .string()
       .required("Nome é obrigatório")
       .min(3, "O nome deve ter no mínimo 3 caracteres"),
@@ -73,16 +69,28 @@ export default function InformationAccount(props: InformationAccount) {
     resolver: yupResolver(schemaAccount),
     mode: "onChange",
     defaultValues: {
-      fullName: props ? `${props.name} ${props.surname}` : "",
+      name: props ? props.name : "",
+      surname: props ? props.surname : "",
       sex: props.sex || "",
       profession: props.profession || "",
     },
   });
 
-  function handleUpdateAccount(data: FormData) {
+  async function handleUpdateAccount(data: FormData) {
     console.log("Updating account with data:", data);
-    // Aqui você pode adicionar a lógica para atualizar os dados da conta
-    setIsEditingAccount(false);
+    setLoading(true);
+    try {
+      const userUpdated = await UserApi.update(data as InformationAccount);
+      console.log("🚀 ~ handleUpdateAccount ~ userUpdated:", userUpdated);
+    } catch (error) {
+      toast.error("Erro ao atualizar conta", {
+        description: (error as Error).message,
+      });
+    } finally {
+      toast.success("Conta atualizada com sucesso!");
+      setLoading(false);
+      setIsEditingAccount(false);
+    }
   }
 
   return (
@@ -109,6 +117,47 @@ export default function InformationAccount(props: InformationAccount) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label
+                  htmlFor="name"
+                  className="flex items-center gap-1 text-muted-foreground"
+                >
+                  <User className="w-4 h-4" />
+                  Nome
+                </Label>
+                <Input
+                  {...register("name")}
+                  className="text-foreground"
+                  id="name"
+                  disabled={!isEditingAccount}
+                />
+
+                {errors.name && (
+                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="surname"
+                  className="flex items-center gap-1 text-muted-foreground"
+                >
+                  <User className="w-4 h-4" />
+                  Sobrenome
+                </Label>
+                <Input
+                  {...register("surname")}
+                  className="text-foreground"
+                  id="surname"
+                  disabled={!isEditingAccount}
+                />
+
+                {errors.surname && (
+                  <p className="text-red-500 text-sm">
+                    {errors.surname.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label
                   htmlFor="email"
                   className="flex items-center gap-1 text-muted-foreground"
                 >
@@ -116,27 +165,6 @@ export default function InformationAccount(props: InformationAccount) {
                   Email
                 </Label>
                 <Input id="email" value={props.email} disabled />
-              </div>
-              <div className="space-y-2">
-                <Label
-                  htmlFor="fullName"
-                  className="flex items-center gap-1 text-muted-foreground"
-                >
-                  <User className="w-4 h-4" />
-                  Nome Completo
-                </Label>
-                <Input
-                  {...register("fullName")}
-                  className="text-foreground"
-                  id="fullName"
-                  disabled={!isEditingAccount}
-                />
-
-                {errors.fullName && (
-                  <p className="text-red-500 text-sm">
-                    {errors.fullName.message}
-                  </p>
-                )}
               </div>
 
               <div className="space-y-2">
@@ -227,7 +255,14 @@ export default function InformationAccount(props: InformationAccount) {
                 </Button>
                 <Button>
                   <Save className="w-4 h-4 mr-2" />
-                  Salvar
+                  {loading ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Salvando...</span>
+                    </div>
+                  ) : (
+                    "Salvar"
+                  )}
                 </Button>
               </div>
             )}
