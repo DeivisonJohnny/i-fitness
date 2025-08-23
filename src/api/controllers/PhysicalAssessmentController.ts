@@ -1,3 +1,4 @@
+import { GeminiApi } from "@/service/Api/GeminiApi";
 import Prisma from "@/service/Prisma";
 import GeminiConstants from "@/utils/GeminiContants";
 import {
@@ -54,8 +55,40 @@ export class PhysicalAssessmentController {
         weight: user?.weight as number,
         profession: user?.profession as string,
       });
-      //    Aqui vai chamar api do gemini
-      return res.json({ message: "Created" });
+
+      const AssessmentPhysical = await GeminiApi.generateAssessmentPhysical(
+        prompt
+      );
+
+      if (!AssessmentPhysical) {
+        return new Error("Aconteceu um erro ao fazer a avaliação fisica");
+      }
+
+      const physicalAssessment = await Prisma.physicalAssessment.create({
+        data: {
+          userId: user.id,
+          bmi: AssessmentPhysical.bmi.value,
+          bmiClassification: AssessmentPhysical.bmi.classification,
+          bmr: AssessmentPhysical.bmr,
+          tdee: AssessmentPhysical.tdee,
+          dailyCaloricTarget: AssessmentPhysical.dailyCaloricTarget.value,
+          dailyCaloricTargetExplanation:
+            AssessmentPhysical.dailyCaloricTarget.explanation,
+          weightGoalRecommendation:
+            AssessmentPhysical.weightGoal.recommendation,
+          proteinsGrams: AssessmentPhysical.macronutrientsSplit.proteinsGrams,
+          carbohydratesGrams:
+            AssessmentPhysical.macronutrientsSplit.carbohydratesGrams,
+          fatsGrams: AssessmentPhysical.macronutrientsSplit.fatsGrams,
+          generalRecommendations: AssessmentPhysical.generalRecommendations,
+        },
+      });
+
+      if (!physicalAssessment) {
+        throw new Error("Aconteceu um erro ao salvar a avaliação fisica");
+      }
+
+      return res.json({ physicalAssessment });
     } catch (error) {
       return res.json(error);
     }

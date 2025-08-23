@@ -1,8 +1,8 @@
 import { VertexAI } from "@google-cloud/vertexai";
 
 const PROJECT_ID = process.env.GEMINI_PROJECT_ID;
-const LOCATION = process.env.GCP_LOCATION || "us-central1";
-const MODEL_NAME = "gemini-1.5-flash-001";
+const LOCATION = "us-central1";
+const MODEL_NAME = "gemini-2.0-flash-001";
 
 if (!PROJECT_ID) {
   throw new Error(

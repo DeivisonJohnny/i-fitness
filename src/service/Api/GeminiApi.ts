@@ -2,6 +2,28 @@ import * as fs from "fs";
 import { Part } from "@google-cloud/vertexai";
 import { generativeModel } from "../Vertex";
 
+type PhysicalAssessment = {
+  bmi: {
+    value: number;
+    classification: string;
+  };
+  bmr: number;
+  tdee: number;
+  dailyCaloricTarget: {
+    value: number;
+    explanation: string;
+  };
+  weightGoal: {
+    recommendation: string;
+  };
+  macronutrientsSplit: {
+    proteinsGrams: number;
+    carbohydratesGrams: number;
+    fatsGrams: number;
+  };
+  generalRecommendations: string;
+};
+
 export class GeminiApi {
   /**
    * Envia um prompt multimodal (texto e imagem) para a API Gemini e retorna a resposta em texto.
@@ -48,5 +70,41 @@ export class GeminiApi {
         mimeType,
       },
     };
+  }
+
+  static async generateAssessmentPhysical(
+    prompt: string
+  ): Promise<PhysicalAssessment> {
+    try {
+      const result = await generativeModel.generateContent({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }],
+          },
+        ],
+      });
+
+      const response = result.response;
+      const responseText = response.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!responseText) {
+        throw new Error(
+          "A resposta da API da Vertex AI está vazia ou em formato inesperado."
+        );
+      }
+
+      const jsonString = responseText.replace(/^```json\s*|```\s*$/g, "");
+
+      const assessmentData = JSON.parse(jsonString);
+
+      return assessmentData.physicalAssessment;
+    } catch (error) {
+      console.error(
+        "Erro ao processar a avaliação física da API Gemini:",
+        error
+      );
+      throw error;
+    }
   }
 }
