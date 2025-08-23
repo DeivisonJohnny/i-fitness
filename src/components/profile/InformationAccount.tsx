@@ -81,13 +81,15 @@ export default function InformationAccount(props: InformationAccount) {
     setLoading(true);
     try {
       const userUpdated = await UserApi.update(data as InformationAccount);
-      console.log("🚀 ~ handleUpdateAccount ~ userUpdated:", userUpdated);
+
+      if (userUpdated) {
+        toast.success("Conta atualizada com sucesso!");
+      }
     } catch (error) {
       toast.error("Erro ao atualizar conta", {
         description: (error as Error).message,
       });
     } finally {
-      toast.success("Conta atualizada com sucesso!");
       setLoading(false);
       setIsEditingAccount(false);
     }

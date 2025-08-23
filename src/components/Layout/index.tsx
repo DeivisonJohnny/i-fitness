@@ -39,8 +39,11 @@ export default function Layout({ children }: Props) {
         enableSystem
         disableTransitionOnChange
       >
-        <Toaster richColors closeButton />
-
+        <Toaster
+          position="top-right"
+          theme="dark"
+          offset={{ top: 80, right: 20 }}
+        />
         <SidebarProvider>
           {showSidebar ? (
             <>

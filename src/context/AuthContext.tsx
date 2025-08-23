@@ -158,7 +158,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         <AuthPage />
       ) : (
         <Layout>
-          <Toaster position="top-right" theme="dark" />
           <Suspense fallback={<Loader />}>{children}</Suspense>
         </Layout>
       )}
