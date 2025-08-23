@@ -6,11 +6,6 @@ import { useState } from "react";
 import { easeOut, motion } from "framer-motion";
 import {
   Mail,
-  Phone,
-  Calendar,
-  MapPin,
-  CreditCard,
-  Clock,
   Ruler,
   Scale,
   Target,
@@ -21,19 +16,24 @@ import {
   X,
   Key,
   Trash2,
-  Camera,
-  ChevronDown,
   User,
   Cake,
-  GroupIcon as Gender,
+  Beaker as Gender,
   Building,
-  Globe,
   Sparkles,
   Dumbbell,
   Zap,
   Weight,
   Plus,
   Settings,
+  Calculator,
+  TrendingUp,
+  FileText,
+  Apple,
+  Beef,
+  Wheat,
+  Droplets,
+  Info,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -43,7 +43,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
 } from "recharts";
 
@@ -57,8 +56,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -75,38 +72,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/hooks/useAuth";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { toast } from "sonner"; // Assuming use-toast is available
-
-// Dados mockados
-const mockUserProfile = {
-  avatar: "/placeholder.svg?height=128&width=128&text=User",
-  email: "joao.silva@example.com",
-  fullName: "João Silva",
-  phone: "(11) 98765-4321",
-  gender: "Masculino",
-  dob: "1990-05-15",
-  address: {
-    city: "São Paulo",
-    state: "SP",
-    country: "Brasil",
-  },
-  cpf: "123.XXX.XXX-XX",
-  accountCreated: "2023-01-20",
-  lastAccess: "2025-07-31 10:30",
-  physical: {
-    height: 1.75, // meters
-    currentWeight: 72, // kg
-    targetWeight: 68, // kg
-    bodyType: "Mesomorfo",
-    activityLevel: "Moderado",
-  },
-  plan: "Premium",
-};
+  objectiveOptions,
+  physicalActivityLevelOptions,
+  typeTrainingOptions,
+} from "@/lib/enums";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const mockWeightHistory = [
   { date: "2025-01-01", weight: 75 },
@@ -121,51 +97,8 @@ const mockWeightHistory = [
 export default function ProfilePage() {
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isEditingPhysical, setIsEditingPhysical] = useState(false);
-  const [accountData, setAccountData] = useState(mockUserProfile);
-  const [physicalData, setPhysicalData] = useState(mockUserProfile.physical);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState(
-    mockUserProfile.avatar
-  );
-  console.log("🚀 ~ ProfilePage ~ avatarFile:", avatarFile);
 
-  const calculateIMC = (weight: number, height: number) => {
-    if (!weight || !height) return "N/A";
-    const imc = weight / (height * height);
-    return imc.toFixed(2);
-  };
-
-  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setAvatarFile(file);
-      setAvatarPreviewUrl(URL.createObjectURL(file));
-      toast("Foto de perfil atualizada!", {
-        description: "Sua nova foto foi carregada.",
-      });
-    }
-  };
-
-  const handleSaveAccount = () => {
-    // Simulate API call
-    console.log("Saving account data:", accountData);
-    setIsEditingAccount(false);
-    toast(
-      "Dados da Conta Salvos!",
-
-      {
-        description: "Suas informações foram atualizadas.",
-      }
-    );
-  };
-
-  const handleSavePhysical = () => {
-    console.log("Saving physical data:", physicalData);
-    setIsEditingPhysical(false);
-    toast("Dados Físicos Salvos!", {
-      description: "Seu perfil físico foi atualizado.",
-    });
-  };
+  const { me } = useAuth();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -187,10 +120,12 @@ export default function ProfilePage() {
     },
   };
 
-  const imcValue = calculateIMC(
-    physicalData.currentWeight,
-    physicalData.height
-  );
+  function formatEnumLabel(value: string): string {
+    return value
+      .replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/^(\w)/, (match) => match.toUpperCase());
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 py-8">
@@ -200,7 +135,6 @@ export default function ProfilePage() {
         animate="visible"
         className="container mx-auto px-4 max-w-4xl"
       >
-        {/* Header */}
         <motion.div variants={itemVariants} className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent mb-2">
             Meu Perfil
@@ -210,44 +144,6 @@ export default function ProfilePage() {
           </p>
         </motion.div>
 
-        {/* Avatar e Plano Atual */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col items-center mb-8"
-        >
-          <div className="relative group mb-4">
-            <Avatar className="w-28 h-28 border-4 border-primary/20 shadow-lg">
-              <AvatarImage
-                src={avatarPreviewUrl || "/placeholder.svg"}
-                alt={accountData.fullName}
-              />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-primary-foreground text-3xl font-semibold">
-                {accountData.fullName
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
-            <input
-              id="avatar-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="hidden"
-            />
-            <Label
-              htmlFor="avatar-upload"
-              className="absolute bottom-0 right-0 bg-primary p-2 rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-md"
-            >
-              <Camera className="w-5 h-5 text-primary-foreground" />
-            </Label>
-          </div>
-          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm px-4 py-1.5 rounded-full shadow-md">
-            Plano: {mockUserProfile.plan}
-          </Badge>
-        </motion.div>
-
-        {/* Seção 1 - Informações da Conta */}
         <motion.div variants={itemVariants} className="mb-8">
           <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -276,7 +172,7 @@ export default function ProfilePage() {
                     <Mail className="w-4 h-4" />
                     Email
                   </Label>
-                  <Input id="email" value={accountData.email} disabled />
+                  <Input id="email" value={me?.email} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label
@@ -287,34 +183,13 @@ export default function ProfilePage() {
                     Nome Completo
                   </Label>
                   <Input
+                    className="text-foreground"
                     id="fullName"
-                    value={accountData.fullName}
-                    onChange={(e) =>
-                      setAccountData({
-                        ...accountData,
-                        fullName: e.target.value,
-                      })
-                    }
+                    value={`${me?.name} ${me?.surname}`}
                     disabled={!isEditingAccount}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="phone"
-                    className="flex items-center gap-1 text-muted-foreground"
-                  >
-                    <Phone className="w-4 h-4" />
-                    Telefone
-                  </Label>
-                  <Input
-                    id="phone"
-                    value={accountData.phone}
-                    onChange={(e) =>
-                      setAccountData({ ...accountData, phone: e.target.value })
-                    }
-                    disabled={!isEditingAccount}
-                  />
-                </div>
+
                 <div className="space-y-2">
                   <Label
                     htmlFor="gender"
@@ -324,10 +199,7 @@ export default function ProfilePage() {
                     Gênero
                   </Label>
                   <Select
-                    value={accountData.gender}
-                    onValueChange={(value) =>
-                      setAccountData({ ...accountData, gender: value })
-                    }
+                    value={me?.sex as string}
                     disabled={!isEditingAccount}
                   >
                     <SelectTrigger id="gender">
@@ -351,11 +223,29 @@ export default function ProfilePage() {
                   <Input
                     id="dob"
                     type="date"
-                    value={accountData.dob}
-                    onChange={(e) =>
-                      setAccountData({ ...accountData, dob: e.target.value })
+                    value={
+                      me?.born
+                        ? typeof me.born === "string"
+                          ? new Date(me.born).toISOString().substring(0, 10)
+                          : new Date(me.born).toISOString().split("T")[0]
+                        : `${me?.born}`
                     }
                     disabled={!isEditingAccount}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="profession"
+                    className="flex items-center gap-1 text-muted-foreground"
+                  >
+                    <Building className="w-4 h-4" />
+                    Profissão
+                  </Label>
+                  <Input
+                    id="profession"
+                    value={me?.profession as string}
+                    disabled={!isEditingAccount}
+                    placeholder="Ex: Engenheiro, Professor, etc."
                   />
                 </div>
               </div>
@@ -368,7 +258,7 @@ export default function ProfilePage() {
                     <X className="w-4 h-4 mr-2" />
                     Cancelar
                   </Button>
-                  <Button onClick={handleSaveAccount}>
+                  <Button>
                     <Save className="w-4 h-4 mr-2" />
                     Salvar
                   </Button>
@@ -377,89 +267,6 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </motion.div>
-
-        {/* Seção 2 - Dados Cadastrais (Colapsável) */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <Collapsible className="rounded-2xl overflow-hidden">
-            <CollapsibleTrigger asChild>
-              <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-2xl cursor-pointer hover:bg-card/80 transition-colors">
-                <CardHeader className="flex flex-row items-center justify-between pb-4">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Building className="w-5 h-5 text-primary" />
-                    Dados Cadastrais
-                  </CardTitle>
-                  <ChevronDown className="w-5 h-5 text-muted-foreground data-[state=open]:rotate-180 transition-transform" />
-                </CardHeader>
-              </Card>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <Card className="border-t-0 border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-b-2xl">
-                <CardContent className="pt-4 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        Cidade
-                      </Label>
-                      <Input value={accountData.address.city} disabled />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-muted-foreground">
-                        <MapPin className="w-4 h-4" />
-                        Estado
-                      </Label>
-                      <Input value={accountData.address.state} disabled />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-muted-foreground">
-                        <Globe className="w-4 h-4" />
-                        País
-                      </Label>
-                      <Input value={accountData.address.country} disabled />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-muted-foreground">
-                        <CreditCard className="w-4 h-4" />
-                        CPF
-                      </Label>
-                      <Input value={accountData.cpf} disabled />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-muted-foreground">
-                        <Calendar className="w-4 h-4" />
-                        Conta Criada Em
-                      </Label>
-                      <Input
-                        value={format(
-                          parseISO(accountData.accountCreated),
-                          "dd/MM/yyyy",
-                          { locale: ptBR }
-                        )}
-                        disabled
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="w-4 h-4" />
-                        Último Acesso
-                      </Label>
-                      <Input
-                        value={format(
-                          parseISO(accountData.lastAccess),
-                          "dd/MM/yyyy 'às' HH:mm",
-                          { locale: ptBR }
-                        )}
-                        disabled
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </CollapsibleContent>
-          </Collapsible>
-        </motion.div>
-
-        {/* Seção 3 - Resumo Físico */}
         <motion.div variants={itemVariants} className="mb-8">
           <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-2xl">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -479,7 +286,7 @@ export default function ProfilePage() {
               )}
             </CardHeader>
             <CardContent className="space-y-4">
-              {physicalData.height && physicalData.currentWeight ? (
+              {me?.height ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -490,13 +297,7 @@ export default function ProfilePage() {
                       <Input
                         type="number"
                         step="0.01"
-                        value={physicalData.height}
-                        onChange={(e) =>
-                          setPhysicalData({
-                            ...physicalData,
-                            height: Number(e.target.value),
-                          })
-                        }
+                        value={me?.height}
                         disabled={!isEditingPhysical}
                       />
                     </div>
@@ -508,13 +309,7 @@ export default function ProfilePage() {
                       <Input
                         type="number"
                         step="0.1"
-                        value={physicalData.currentWeight}
-                        onChange={(e) =>
-                          setPhysicalData({
-                            ...physicalData,
-                            currentWeight: Number(e.target.value),
-                          })
-                        }
+                        value={me?.weight as number}
                         disabled={!isEditingPhysical}
                       />
                     </div>
@@ -523,70 +318,78 @@ export default function ProfilePage() {
                         <Zap className="w-4 h-4" />
                         IMC
                       </Label>
-                      <Input value={imcValue} disabled />
+                      <Input value={me?.physicalAssessment?.bmi} disabled />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-muted-foreground">
-                        <Target className="w-4 h-4" />
-                        Meta de Peso (kg)
-                      </Label>
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={physicalData.targetWeight}
-                        onChange={(e) =>
-                          setPhysicalData({
-                            ...physicalData,
-                            targetWeight: Number(e.target.value),
-                          })
-                        }
-                        disabled={!isEditingPhysical}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1 text-muted-foreground">
-                        <User className="w-4 h-4" />
-                        Tipo de Corpo
-                      </Label>
-                      <Select
-                        value={physicalData.bodyType}
-                        onValueChange={(value) =>
-                          setPhysicalData({ ...physicalData, bodyType: value })
-                        }
-                        disabled={!isEditingPhysical}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Ectomorfo">Ectomorfo</SelectItem>
-                          <SelectItem value="Mesomorfo">Mesomorfo</SelectItem>
-                          <SelectItem value="Endomorfo">Endomorfo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+
                     <div className="space-y-2">
                       <Label className="flex items-center gap-1 text-muted-foreground">
                         <Activity className="w-4 h-4" />
                         Nível de Atividade
                       </Label>
                       <Select
-                        value={physicalData.activityLevel}
-                        onValueChange={(value) =>
-                          setPhysicalData({
-                            ...physicalData,
-                            activityLevel: value,
-                          })
-                        }
+                        value={me?.physical_activity_level ?? undefined}
                         disabled={!isEditingPhysical}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Sedentário">Sedentário</SelectItem>
-                          <SelectItem value="Moderado">Moderado</SelectItem>
-                          <SelectItem value="Intenso">Intenso</SelectItem>
+                          {Object.entries(physicalActivityLevelOptions).map(
+                            ([key, value]) => (
+                              <SelectItem key={key} value={key}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <p>{formatEnumLabel(key)}</p>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>{value}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-1 text-muted-foreground">
+                        <Dumbbell className="w-4 h-4" />
+                        Tipo de Treino
+                      </Label>
+                      <Select
+                        value={me?.type_training as string}
+                        disabled={!isEditingPhysical}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={me?.type_training} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {typeTrainingOptions.map((item) => (
+                            <SelectItem value={item}>
+                              {formatEnumLabel(item)}{" "}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="flex items-center gap-1 text-muted-foreground">
+                        <Target className="w-4 h-4" />
+                        Objetivo Principal
+                      </Label>
+                      <Select
+                        value={me?.objective as string}
+                        disabled={!isEditingPhysical}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {objectiveOptions.map((item) => (
+                            <SelectItem value={item}>
+                              {formatEnumLabel(item)}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -600,7 +403,7 @@ export default function ProfilePage() {
                         <X className="w-4 h-4 mr-2" />
                         Cancelar
                       </Button>
-                      <Button onClick={handleSavePhysical}>
+                      <Button>
                         <Save className="w-4 h-4 mr-2" />
                         Salvar
                       </Button>
@@ -626,8 +429,255 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </motion.div>
+        <motion.div variants={itemVariants} className="mb-8">
+          <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Calculator className="w-5 h-5 text-primary" />
+                Avaliação Física
+              </CardTitle>
+              <CardDescription>
+                Análise completa dos seus dados físicos e recomendações
+                personalizadas.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {me?.physicalAssessment ? (
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-1">
+                          IMC
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="w-3 h-3 text-blue-500 hover:text-blue-600 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                <strong>Índice de Massa Corporal</strong>
+                                <br />
+                                Medida que relaciona peso e altura para avaliar
+                                se uma pessoa está no peso ideal, abaixo ou
+                                acima do peso recomendado.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </span>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                        {me?.physicalAssessment.bmi}
+                      </div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400">
+                        {me?.physicalAssessment.bmiClassification}
+                      </div>
+                    </div>
 
-        {/* Seção 4 - Evolução (Gráfico de Peso) */}
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/50 p-4 rounded-xl border border-green-200 dark:border-green-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Zap className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        <span className="text-sm font-medium text-green-700 dark:text-green-300 flex items-center gap-1">
+                          TMB
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="w-3 h-3 text-green-500 hover:text-green-600 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                <strong>Taxa Metabólica Basal</strong>
+                                <br />
+                                Quantidade mínima de energia (calorias) que seu
+                                corpo precisa para manter as funções vitais em
+                                repouso, como respiração e circulação.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </span>
+                      </div>
+                      <div className="text-2xl font-bold text-green-900 dark:text-green-100">
+                        {me?.physicalAssessment.bmr}
+                      </div>
+                      <div className="text-xs text-green-600 dark:text-green-400">
+                        kcal/dia
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/50 p-4 rounded-xl border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                        <span className="text-sm font-medium text-purple-700 dark:text-purple-300 flex items-center gap-1">
+                          TDEE
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="w-3 h-3 text-purple-500 hover:text-purple-600 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">
+                                <strong>Total Daily Energy Expenditure</strong>
+                                <br />
+                                Gasto energético diário total, incluindo
+                                metabolismo basal, atividade física e digestão.
+                                Representa todas as calorias que você queima por
+                                dia.
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </span>
+                      </div>
+                      <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                        {me?.physicalAssessment.tdee}
+                      </div>
+                      <div className="text-xs text-purple-600 dark:text-purple-400">
+                        kcal/dia
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 p-4 rounded-xl border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Target className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                        <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                          Meta Calórica
+                        </span>
+                      </div>
+                      <div className="text-2xl font-bold text-orange-900 dark:text-orange-100">
+                        {me?.physicalAssessment.dailyCaloricTarget}
+                      </div>
+                      <div className="text-xs text-orange-600 dark:text-orange-400">
+                        kcal/dia
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted/50 p-4 rounded-xl border border-border/50">
+                    <div className="flex items-start gap-2">
+                      <FileText className="w-4 h-4 text-muted-foreground mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-foreground mb-1">
+                          Explicação da Meta Calórica
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {me?.physicalAssessment.dailyCaloricTargetExplanation}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <Apple className="w-4 h-4 text-primary" />
+                      Distribuição de Macronutrientes
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/50 dark:to-red-900/50 p-4 rounded-xl border border-red-200 dark:border-red-800">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Beef className="w-4 h-4 text-red-600 dark:text-red-400" />
+                          <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                            Proteínas
+                          </span>
+                        </div>
+                        <div className="text-xl font-bold text-red-900 dark:text-red-100">
+                          {me?.physicalAssessment.proteinsGrams}g
+                        </div>
+                        <div className="text-xs text-red-600 dark:text-red-400">
+                          por dia
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/50 p-4 rounded-xl border border-amber-200 dark:border-amber-800">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Wheat className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                          <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                            Carboidratos
+                          </span>
+                        </div>
+                        <div className="text-xl font-bold text-amber-900 dark:text-amber-100">
+                          {me?.physicalAssessment.carbohydratesGrams}g
+                        </div>
+                        <div className="text-xs text-amber-600 dark:text-amber-400">
+                          por dia
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950/50 dark:to-yellow-900/50 p-4 rounded-xl border border-yellow-200 dark:border-yellow-800">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Droplets className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                          <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
+                            Gorduras
+                          </span>
+                        </div>
+                        <div className="text-xl font-bold text-yellow-900 dark:text-yellow-100">
+                          {me?.physicalAssessment.fatsGrams}g
+                        </div>
+                        <div className="text-xs text-yellow-600 dark:text-yellow-400">
+                          por dia
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-blue-50 dark:bg-blue-950/50 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-start gap-2">
+                      <Scale className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                          Recomendação de Peso
+                        </h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          {me?.physicalAssessment.weightGoalRecommendation}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/50 dark:to-emerald-900/50 p-4 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-emerald-900 dark:text-emerald-100 mb-2">
+                          Recomendações Personalizadas
+                        </h4>
+                        <p className="text-sm text-emerald-700 dark:text-emerald-300 leading-relaxed">
+                          {me?.physicalAssessment?.generalRecommendations}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground text-center pt-2 border-t border-border/50">
+                    Avaliação realizada em{" "}
+                    {me?.physicalAssessment?.createdAt
+                      ? format(
+                          me.physicalAssessment.createdAt,
+                          "dd/MM/yyyy 'às' HH:mm",
+                          {
+                            locale: ptBR,
+                          }
+                        )
+                      : ""}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <Calculator className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    Avaliação Física Não Disponível
+                  </h3>
+                  <p className="text-muted-foreground mb-6 max-w-md">
+                    Complete suas informações físicas para gerar uma avaliação
+                    personalizada com recomendações de calorias e
+                    macronutrientes.
+                  </p>
+                  <Button className="flex items-center gap-2">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Gerar Avaliação Física
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
         <motion.div variants={itemVariants} className="mb-8">
           <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-2xl">
             <CardHeader>
@@ -656,15 +706,7 @@ export default function ProfilePage() {
                       fontSize={12}
                       domain={["dataMin - 2", "dataMax + 2"]}
                     />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#1F2937",
-                        border: "1px solid #374151",
-                        borderRadius: "8px",
-                        color: "#F9FAFB",
-                      }}
-                      formatter={(value: number) => [`${value} kg`, "Peso"]}
-                    />
+                    <Tooltip />
                     <Line
                       type="monotone"
                       dataKey="weight"
@@ -697,7 +739,6 @@ export default function ProfilePage() {
           </Card>
         </motion.div>
 
-        {/* Ações / Configurações */}
         <motion.div variants={itemVariants} className="mb-8">
           <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-2xl">
             <CardHeader>
