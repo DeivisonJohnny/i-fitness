@@ -4,7 +4,7 @@ import UserApi from "@/service/Api/UserApi";
 import { TOKEN_KEY } from "@/utils/Constant";
 import Storage from "@/utils/Storage";
 import Token from "@/utils/Token";
-import { User } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
 import {
@@ -29,10 +29,13 @@ function Loader() {
     </div>
   );
 }
+type UserWithAssessment = Prisma.UserGetPayload<{
+  include: { physicalAssessment: true };
+}>;
 
 interface AuthContextProps {
   isAuthenticated: boolean;
-  user?: User | null;
+  me?: UserWithAssessment | null;
   logout: () => void;
 }
 
@@ -47,7 +50,7 @@ interface AuthProviderProps {
 const publicPaths = ["/auth/[form]", "/public"];
 
 export default function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserWithAssessment | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -117,7 +120,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             const resultAssessment = await PhysicalAssessmentApi.create();
           }
 
-          setUser(me);
+          setUser({ ...me, physicalAssessment });
           setIsAuthenticated(true);
         }
       } catch (err: unknown) {
@@ -145,7 +148,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, logout, user }}>
+    <AuthContext.Provider value={{ isAuthenticated, logout, me: user }}>
       {!isAuthenticated && !isPublicPage ? (
         <AuthPage />
       ) : (
