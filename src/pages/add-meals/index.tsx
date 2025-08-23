@@ -35,7 +35,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
 import Image from "next/image";
 
 type Nutrients = {

@@ -37,7 +37,7 @@ export default function AuthPage() {
     "signup" | "login" | "complet" | string
   >("login");
 
-  const { user } = useAuth();
+  const { me } = useAuth();
 
   const router = useRouter();
 
@@ -193,7 +193,7 @@ export default function AuthPage() {
                   </button>
                 </div>
               </>
-            ) : typeForm == "complet" && user ? (
+            ) : typeForm == "complet" && me ? (
               <>
                 <h2 className="text-2xl font-bold text-black dark:text-white mb-4">
                   Complete seu cadastro

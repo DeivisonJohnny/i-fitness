@@ -118,6 +118,11 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
           if (!physicalAssessment) {
             const resultAssessment = await PhysicalAssessmentApi.create();
+            if (resultAssessment) {
+              toast.success("Avaliação física inicial criada com sucesso.");
+            } else {
+              toast.error("Erro ao criar avaliação física inicial.");
+            }
           }
 
           setUser({ ...me, physicalAssessment });
