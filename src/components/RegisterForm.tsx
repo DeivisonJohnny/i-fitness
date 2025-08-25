@@ -9,6 +9,8 @@ import * as yup from "yup";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { toast } from "sonner";
+import { useRouter } from "next/router";
 
 type FormRegisterUser = {
   name: string;
@@ -105,15 +107,23 @@ export default function RegisterForm() {
     }),
   };
 
+  const router = useRouter();
+
   const handleRegisterUser = async (data: FormRegisterUser) => {
     try {
       const { token } = await UserApi.create(data);
 
       if (token) {
         Storage.set("token_auth", token);
+
+        toast.success("Cadastro realizado com sucesso!");
+        router.push("/dashboard");
       }
     } catch (error) {
       console.log(error);
+      toast.error("Erro ao cadastrar usuário. Tente novamente.", {
+        description: (error as Error).message,
+      });
     }
   };
 

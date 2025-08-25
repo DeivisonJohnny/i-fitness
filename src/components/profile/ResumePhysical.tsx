@@ -33,18 +33,14 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-
-type ResumePhysicalProps = {
-  height?: number | null;
-  weight?: number | null;
-  physical_activity_level?: string | null;
-  type_training?: string | null;
-  objective?: string | null;
-  imc: number | null;
-};
+import { toast } from "sonner";
+import UserApi, {
+  ResumePhysical as ResumePhysicalProps,
+} from "@/service/Api/UserApi";
 
 export default function ResumePhysical(props: ResumePhysicalProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -119,9 +115,23 @@ export default function ResumePhysical(props: ResumePhysicalProps) {
     },
   });
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     console.log("Dados enviados:", data);
-    setIsEditing(false);
+    setLoading(true);
+    try {
+      const response = await UserApi.update(data as ResumePhysicalProps);
+      console.log("Resposta da API:", response);
+      if (response) {
+        toast.success("Informações físicas atualizadas com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar informações físicas:", error);
+      toast.error("Erro ao atualizar informações físicas.", {
+        description: (error as Error).message,
+      });
+    } finally {
+      setIsEditing(false);
+    }
   };
 
   return (
@@ -304,7 +314,14 @@ export default function ResumePhysical(props: ResumePhysicalProps) {
                   </Button>
                   <Button type="submit">
                     <Save className="w-4 h-4 mr-2" />
-                    Salvar
+                    {loading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Salvando...</span>
+                      </div>
+                    ) : (
+                      "Salvar"
+                    )}
                   </Button>
                 </div>
               )}

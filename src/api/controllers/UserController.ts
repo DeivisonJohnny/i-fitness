@@ -17,7 +17,7 @@ export default class UserController {
       });
 
       if (emailUsed) {
-        throw Error("Email já registrado");
+        throw new ApiError("Email já registrado");
       }
 
       const newUser = await Prisma.user.create({
@@ -82,13 +82,13 @@ export default class UserController {
       });
 
       if (!user) {
-        throw new Error("A coleta dos dados do usuario falhou");
+        throw new ApiError("A coleta dos dados do usuario falhou");
       }
 
       return res.json(user);
     } catch (error) {
       console.log(error);
-      return res.json({ message: error });
+      return res.json(error);
     }
   }
 
@@ -121,7 +121,7 @@ export default class UserController {
     const { email, password: passwordInput } = req.body;
 
     if (!email || !passwordInput) {
-      return new Error("Autenticação falhou por falta de dados");
+      throw new ApiError("Autenticação falhou por falta de dados");
     }
 
     try {
@@ -147,14 +147,14 @@ export default class UserController {
       });
 
       if (!userWithPassword) {
-        throw new Error("Usuario inválido");
+        throw new ApiError("Usuario inválido");
       }
 
       const { password, ...user } = userWithPassword;
       const checkPassword = await Util.checkHash(passwordInput, password);
 
       if (!password || !checkPassword) {
-        throw new Error("Usuario e/ou senha inválida");
+        throw new ApiError("Usuario e/ou senha inválida");
       }
 
       const token = await Token.create(
@@ -163,7 +163,7 @@ export default class UserController {
       );
 
       if (!token) {
-        throw new Error("Erro inesperado ao criar o token de autenticação");
+        throw new ApiError("Erro inesperado ao criar o token de autenticação");
       }
 
       return res.json({ user, token });

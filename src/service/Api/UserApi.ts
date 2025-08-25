@@ -10,6 +10,16 @@ export type InformationAccount = {
   sex: Sex;
   born: Date;
 };
+
+export type ResumePhysical = {
+  height?: number | null;
+  weight?: number | null;
+  physical_activity_level?: string | null;
+  type_training?: string | null;
+  objective?: string | null;
+  imc: number | null;
+};
+
 export default class UserApi {
   static async create(data: Partial<User>): Promise<{ token: string }> {
     return Api.post("/user", data);
@@ -22,7 +32,9 @@ export default class UserApi {
     return Api.post("/user/me", data);
   }
 
-  static async update(data: User | FormComplementUser | InformationAccount) {
+  static async update(
+    data: User | FormComplementUser | InformationAccount | ResumePhysical
+  ) {
     return Api.put("/user", data);
   }
 

@@ -79,7 +79,7 @@ export default function AuthPage() {
         });
       }
     } finally {
-      setIsLoading(true);
+      setIsLoading(false);
     }
   };
 

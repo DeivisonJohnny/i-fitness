@@ -116,7 +116,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             router.replace("/auth/complet");
           }
 
-          if (!physicalAssessment) {
+          if (!physicalAssessment && isRegisterCompleteForMe) {
             const resultAssessment = await PhysicalAssessmentApi.create();
             if (resultAssessment) {
               toast.success("Avaliação física inicial criada com sucesso.");
@@ -128,14 +128,11 @@ export default function AuthProvider({ children }: AuthProviderProps) {
           setUser({ ...me, physicalAssessment });
           setIsAuthenticated(true);
         }
-      } catch (err: unknown) {
-        let errorMessage = "Erro desconhecido";
-        if (err instanceof Error) {
-          errorMessage = err.message;
-        }
-        console.error("Erro de autenticação:", errorMessage);
+      } catch (err) {
+        console.error("Erro de autenticação:", err);
         toast("Erro na autenticação", {
-          description: errorMessage,
+          description:
+            (err as Error).message || "Por favor, faça o login novamente.",
         });
         logout();
       } finally {

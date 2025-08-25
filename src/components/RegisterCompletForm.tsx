@@ -56,8 +56,8 @@ export default function CompletRegister() {
       .typeError("Data inválida"),
     height: yup
       .number()
-      .min(30, "Altura mínima: 30cm")
-      .max(300, "Altura máxima: 300cm")
+      .min(1, "Altura mínima: 1m")
+      .max(3, "Altura máxima: 3m")
       .required("Altura é obrigatória")
       .typeError("Precisa ser numero"),
 
@@ -224,7 +224,7 @@ export default function CompletRegister() {
             </div>
             <div className="flex flex-col gap-[5px]">
               <Label htmlFor="height" className="mt-4">
-                Altura (cm)
+                Altura (m)
               </Label>
               <Input id="height" {...register("height")} type="number" />
               {errors.height && (
