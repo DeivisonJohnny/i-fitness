@@ -34,6 +34,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
+import { typesMealOptions } from "@/lib/enums";
 
 type Nutrients = {
   calories: number;
@@ -275,6 +276,7 @@ export default function AddMeals() {
                     >
                       Tipo de Refeição
                     </Label>
+
                     <Select
                       value={mealData.type}
                       onValueChange={(value) => handleChange("type", value)}
@@ -286,11 +288,15 @@ export default function AddMeals() {
                         <SelectValue placeholder="Selecione o tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                        {mealTypesOptions.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
+                        {Object.entries(typesMealOptions).map(
+                          ([key, label]) => {
+                            return (
+                              <SelectItem key={key} value={key}>
+                                {label}
+                              </SelectItem>
+                            );
+                          }
+                        )}
                       </SelectContent>
                     </Select>
                     {errors.type && (

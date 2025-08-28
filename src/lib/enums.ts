@@ -1,4 +1,4 @@
-import { Objective, Sex, TypeTraining } from "@prisma/client";
+import { Objective, Sex, TypesMeal, TypeTraining } from "@prisma/client";
 
 export enum PhysicalActivityLevelEnum {
   Sedentario = "Sedentario",
@@ -25,3 +25,14 @@ export const physicalActivityLevelOptions: Record<
 export const typeTrainingOptions = Object.values(TypeTraining);
 export const objectiveOptions = Object.values(Objective);
 export const sexOptions = Object.values(Sex);
+
+export const typesMealOptions: Record<TypesMeal, string> = {
+  CAFE_DA_MANHA: "Café da Manhã",
+  ALMOCO: "Almoço",
+  JANTAR: "Jantar",
+  LANCHE: "Lanche",
+  PRE_TREINO: "Pré-treino",
+  POS_TREINO: "Pós-treino",
+  CEIA: "Ceia",
+  OUTRO: "Outro",
+};

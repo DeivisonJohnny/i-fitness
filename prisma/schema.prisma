@@ -71,15 +71,15 @@ model Meals {
 
   imgUrl      String
   type        TypesMeal
-  timeMeal    DateTime  @default(now())
+  hourMeal    DateTime  @default(now())
   description String?   @db.Text
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  nutrients Nutrients?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now())
+  AssessmentMeals AssessmentMeals?
 }
 
 enum TypesMeal {
@@ -93,22 +93,19 @@ enum TypesMeal {
   OUTRO         @map("Outro")
 }
 
-model Nutrients {
+model AssessmentMeals {
   id String @id @default(uuid())
 
-  calories      Float
-  carbohydrates Float
-  proteins      Float
-  totalFat      Float
-  fiber         Float
-  sugar         Float
-  sodium        Float
+  calories      Int
+  proteinsGrams Int
+  carbsGrams    Int
+  fatsGrams     Int
+
+  mealId String @unique
+  meal   Meals  @relation(fields: [mealId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  meals   Meals  @relation(fields: [mealsId], references: [id])
-  mealsId String @unique
 }
 
 model PhysicalAssessment {
