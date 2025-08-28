@@ -11,6 +11,10 @@ export type TypeMeal = {
 export default class MealsApi {
   static async create(data: TypeMeal | any) {
     console.log("🚀 ~ MealsApi ~ create ~ data:", data);
-    return Api.post("/meal", data);
+    return Api.post("/meal", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   }
 }

@@ -5,6 +5,7 @@ import bodyParser from "./middlewares/BodyParser";
 import auth from "./middlewares/Auth";
 import { PhysicalAssessmentController } from "./controllers/PhysicalAssessmentController";
 import MealsController from "./controllers/MealsController";
+import { file } from "./middlewares/FileUpload";
 
 export default function routes(
   api: NextConnect<NextApiRequest, NextApiResponse>
@@ -22,7 +23,7 @@ export default function routes(
     PhysicalAssessmentController.createPhysicalAssessment
   );
 
-  api.post("/meal", auth(), MealsController.createMeal);
+  api.post("/meal", auth(), file(), MealsController.createMeal);
 
   return api;
 }
