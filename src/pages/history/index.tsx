@@ -434,7 +434,7 @@ export default function HistoryPage() {
                 acompanhar.
               </p>
               <Button
-                onClick={() => router.push("/add-meal-ai")}
+                onClick={() => router.push("/add-meals")}
                 className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -520,22 +520,6 @@ export default function HistoryPage() {
               ))}
             </div>
           )}
-        </motion.div>
-
-        {/* Botão Flutuante Adicionar Refeição */}
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
-          className="fixed bottom-6 right-6 z-50"
-        >
-          <Button
-            size="lg"
-            className="w-14 h-14 rounded-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg"
-            onClick={() => router.push("/add-meal-ai")}
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
         </motion.div>
 
         {/* Botão de Exportar (Opcional) */}

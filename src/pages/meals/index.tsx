@@ -53,6 +53,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 // Tipagem para nutrientes estimados
 interface EstimatedNutrientsType {
@@ -123,40 +124,8 @@ const mealTypes = [
 
 export default function MealsPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEstimating, setIsEstimating] = useState(false);
-  const [estimatedNutrients, setEstimatedNutrients] =
-    useState<EstimatedNutrientsType | null>(null);
-  const [newMeal, setNewMeal] = useState<NewMealType>({
-    type: "",
-    description: "",
-    time: "",
-    image: null,
-  });
 
-  const handleEstimateNutrients = async () => {
-    if (!newMeal.description.trim()) return;
-
-    setIsEstimating(true);
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    setEstimatedNutrients({
-      calories: Math.floor(Math.random() * 400) + 200,
-      protein: Math.floor(Math.random() * 30) + 10,
-      carbs: Math.floor(Math.random() * 50) + 20,
-      fat: Math.floor(Math.random() * 20) + 5,
-    });
-
-    setIsEstimating(false);
-  };
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setNewMeal((prev) => ({ ...prev, image: file }));
-    }
-  };
+  const router = useRouter();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -176,220 +145,6 @@ export default function MealsPage() {
       transition: { duration: 0.5, ease: easeOut },
     },
   };
-
-  // Modal de adicionar refeição
-  const AddMealModal = () => (
-    <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
-          Adicionar Nova Refeição
-        </DialogTitle>
-        <DialogDescription>
-          Registre sua refeição e deixe nossa IA estimar os nutrientes
-        </DialogDescription>
-      </DialogHeader>
-
-      <div className="space-y-6 py-4">
-        {/* Upload de Imagem */}
-        <div className="space-y-2">
-          <Label htmlFor="image">Foto da Refeição</Label>
-          <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-            <input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-            <Label htmlFor="image" className="cursor-pointer">
-              {newMeal.image ? (
-                <div className="space-y-2">
-                  <div className="w-20 h-20 mx-auto bg-muted rounded-lg flex items-center justify-center">
-                    <Camera className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-foreground">
-                    {newMeal.image.name}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Clique para adicionar uma foto
-                  </p>
-                </div>
-              )}
-            </Label>
-          </div>
-        </div>
-
-        {/* Tipo da Refeição */}
-        <div className="space-y-2">
-          <Label htmlFor="type">Tipo da Refeição</Label>
-          <Select
-            value={newMeal.type}
-            onValueChange={(value: string) =>
-              setNewMeal((prev) => ({ ...prev, type: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Selecione o tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              {mealTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Descrição */}
-        <div className="space-y-2">
-          <Label htmlFor="description">Descrição da Refeição</Label>
-          <Textarea
-            id="description"
-            placeholder="Descreva o que você comeu ou vai comer..."
-            value={newMeal.description}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setNewMeal((prev) => ({ ...prev, description: e.target.value }))
-            }
-            rows={3}
-          />
-        </div>
-
-        {/* Horário */}
-        <div className="space-y-2">
-          <Label htmlFor="time">Horário (opcional)</Label>
-          <Input
-            id="time"
-            type="time"
-            value={newMeal.time}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setNewMeal((prev) => ({ ...prev, time: e.target.value }))
-            }
-          />
-        </div>
-
-        {/* Botão Estimar Nutrientes */}
-        <Button
-          onClick={handleEstimateNutrients}
-          disabled={!newMeal.description.trim() || isEstimating}
-          className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
-        >
-          {isEstimating ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              IA Analisando...
-            </>
-          ) : (
-            <>
-              <Bot className="w-4 h-4 mr-2" />
-              Estimar Nutrientes com IA
-            </>
-          )}
-        </Button>
-
-        {/* Resultado da Estimativa */}
-        <AnimatePresence>
-          {estimatedNutrients && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-4"
-            >
-              <Separator />
-              <div className="space-y-3">
-                {/* Exibição dos nutrientes estimados */}
-                <div className="flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium">Estimativa por IA</span>
-                  <Badge variant="secondary" className="text-xs">
-                    Automático
-                  </Badge>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Calorias */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Zap className="w-3 h-3" />
-                        Calorias
-                      </span>
-                      <span className="font-medium">
-                        {estimatedNutrients.calories} kcal
-                      </span>
-                    </div>
-                    <Progress value={75} className="h-2" />
-                  </div>
-                  {/* Proteínas */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Beef className="w-3 h-3" />
-                        Proteínas
-                      </span>
-                      <span className="font-medium">
-                        {estimatedNutrients.protein}g
-                      </span>
-                    </div>
-                    <Progress value={60} className="h-2" />
-                  </div>
-                  {/* Carboidratos */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Wheat className="w-3 h-3" />
-                        Carboidratos
-                      </span>
-                      <span className="font-medium">
-                        {estimatedNutrients.carbs}g
-                      </span>
-                    </div>
-                    <Progress value={80} className="h-2" />
-                  </div>
-                  {/* Gorduras */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Droplets className="w-3 h-3" />
-                        Gorduras
-                      </span>
-                      <span className="font-medium">
-                        {estimatedNutrients.fat}g
-                      </span>
-                    </div>
-                    <Progress value={45} className="h-2" />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Botões */}
-        <div className="flex gap-3 pt-4">
-          <Button
-            variant="outline"
-            onClick={() => setIsModalOpen(false)}
-            className="flex-1"
-          >
-            Cancelar
-          </Button>
-          <Button
-            className="flex-1 bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
-            disabled={!newMeal.type || !newMeal.description.trim()}
-          >
-            Salvar Refeição
-          </Button>
-        </div>
-      </div>
-    </DialogContent>
-  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -457,18 +212,14 @@ export default function MealsPage() {
 
           {/* Add Meal Button */}
           <motion.div variants={itemVariants} className="flex justify-center">
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg"
-                >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Adicionar Refeição
-                </Button>
-              </DialogTrigger>
-              <AddMealModal />
-            </Dialog>
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg"
+              onClick={() => router.push("/add-meals")}
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              Adicionar Refeição
+            </Button>
           </motion.div>
 
           {/* Meals List */}

@@ -358,21 +358,6 @@ export default function DashboardPage() {
             </motion.div>
           </main>
         </div>
-
-        {/* Floating Action Button */}
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
-          className="fixed bottom-6 right-6"
-        >
-          <Button
-            size="lg"
-            className="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg"
-          >
-            <Plus className="w-6 h-6" />
-          </Button>
-        </motion.div>
       </div>
     </div>
   );
