@@ -4,6 +4,7 @@ import UserController from "./controllers/UserController";
 import bodyParser from "./middlewares/BodyParser";
 import auth from "./middlewares/Auth";
 import { PhysicalAssessmentController } from "./controllers/PhysicalAssessmentController";
+import MealsController from "./controllers/MealsController";
 
 export default function routes(
   api: NextConnect<NextApiRequest, NextApiResponse>
@@ -20,6 +21,8 @@ export default function routes(
     auth(),
     PhysicalAssessmentController.createPhysicalAssessment
   );
+
+  api.post("/meal", auth(), MealsController.createMeal);
 
   return api;
 }

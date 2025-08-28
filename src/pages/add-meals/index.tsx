@@ -35,6 +35,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { typesMealOptions } from "@/lib/enums";
+import MealsApi, { TypeMeal } from "@/service/Api/MealsApi";
 
 type Nutrients = {
   calories: number;
@@ -90,17 +91,6 @@ export default function AddMeals() {
     Partial<Nutrients>
   >({});
 
-  const mealTypesOptions = [
-    "Café da manhã",
-    "Almoço",
-    "Jantar",
-    "Lanche",
-    "Pré-treino",
-    "Pós-treino",
-    "Ceia",
-    "Outro",
-  ];
-
   const handleChange = (field: string, value: string | File | null) => {
     if (errors[field]) {
       setErrors((prev) => {
@@ -132,7 +122,6 @@ export default function AddMeals() {
     try {
       await mealValidationSchema.validate(mealData, { abortEarly: false });
 
-      setIsSubmitting(true);
       console.log("Formulário válido! Enviando dados para a API:", mealData);
 
       const formData = new FormData();
@@ -143,9 +132,8 @@ export default function AddMeals() {
         formData.append("image", mealData.imageFile);
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      alert("Refeição salva com sucesso! (Simulação)");
-      router.push("/meals");
+      const response = await MealsApi.create(formData);
+      setIsSubmitting(false);
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const newErrors: { [key: string]: string } = {};
