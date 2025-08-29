@@ -5,5 +5,8 @@ declare module "next" {
     params: { [key: string]: string };
 
     userId: string;
+
+    file?: File;
+    files?: File[];
   }
 }

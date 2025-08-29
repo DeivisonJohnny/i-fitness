@@ -36,6 +36,7 @@ import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { typesMealOptions } from "@/lib/enums";
 import MealsApi, { TypeMeal } from "@/service/Api/MealsApi";
+import AttachmentApi from "@/service/Api/AttechmentApi";
 
 type Nutrients = {
   calories: number;
@@ -118,32 +119,38 @@ export default function AddMeals() {
   const handleSaveMeal = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
+    setIsSubmitting(true);
 
     try {
       await mealValidationSchema.validate(mealData, { abortEarly: false });
 
-      console.log("Formulário válido! Enviando dados para a API:", mealData);
+      let imageUrl = "";
 
-      const formData = new FormData();
-      formData.append("type", mealData.type);
-      formData.append("description", mealData.description);
-      formData.append("time", mealData.time);
       if (mealData.imageFile) {
-        formData.append("image", mealData.imageFile);
+        const newAttachment = await AttachmentApi.create({
+          modelId: "",
+          model: "meal",
+          file: mealData.imageFile,
+        });
+
+        imageUrl = newAttachment?.url || "";
+        console.log(newAttachment);
       }
 
-      const response = await MealsApi.create(formData);
-      setIsSubmitting(false);
+      const response = await MealsApi.create({
+        ...mealData,
+        urlImage: imageUrl,
+      });
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const newErrors: { [key: string]: string } = {};
         err.inner.forEach((error) => {
-          if (error.path) {
-            newErrors[error.path] = error.message;
-          }
+          if (error.path) newErrors[error.path] = error.message;
         });
         setErrors(newErrors);
         console.log("Erros de validação:", newErrors);
+      } else {
+        console.error("Erro ao salvar refeição:", err);
       }
     } finally {
       setIsSubmitting(false);

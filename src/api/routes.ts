@@ -6,6 +6,7 @@ import auth from "./middlewares/Auth";
 import { PhysicalAssessmentController } from "./controllers/PhysicalAssessmentController";
 import MealsController from "./controllers/MealsController";
 import { file } from "./middlewares/FileUpload";
+import { AttachmentController } from "./controllers/AttachmentController";
 
 export default function routes(
   api: NextConnect<NextApiRequest, NextApiResponse>
@@ -24,6 +25,8 @@ export default function routes(
   );
 
   api.post("/meal", auth(), file(), MealsController.createMeal);
+
+  api.post("attachments", auth(), file(), AttachmentController.create);
 
   return api;
 }

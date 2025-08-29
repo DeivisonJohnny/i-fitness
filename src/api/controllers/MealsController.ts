@@ -7,6 +7,7 @@ export default class MealsController {
 
       const data = req.body;
       console.log("🚀 ~ MealsController ~ createMeal ~ data:", data);
+
       return res.status(201).json({ message: "Meal created successfully" });
     } catch (error) {
       console.error("Error creating meal:", error);
