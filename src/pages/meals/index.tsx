@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence, easeOut, Variants } from "framer-motion";
 import {
   Plus,
@@ -54,6 +54,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import MealsApi, { MealType, Paginate } from "@/service/Api/MealsApi";
 
 // Tipagem para nutrientes estimados
 interface EstimatedNutrientsType {
@@ -70,60 +71,9 @@ interface NewMealType {
   image: File | null;
 }
 
-// Dados mockados
-const mockMeals = [
-  {
-    id: 1,
-    name: "Café da Manhã",
-    description: "Aveia com frutas vermelhas e mel",
-    image: "/placeholder.svg?height=80&width=80",
-    time: "08:30",
-    calories: 420,
-    protein: 18,
-    carbs: 65,
-    fat: 12,
-    tags: ["Rico em fibras", "Antioxidantes"],
-    estimatedByAI: true,
-  },
-  {
-    id: 2,
-    name: "Almoço",
-    description: "Salmão grelhado com quinoa e legumes",
-    image: "/placeholder.svg?height=80&width=80",
-    time: "12:45",
-    calories: 680,
-    protein: 45,
-    carbs: 52,
-    fat: 28,
-    tags: ["Alto em proteína", "Ômega-3", "Low carb"],
-    estimatedByAI: true,
-  },
-  {
-    id: 3,
-    name: "Lanche",
-    description: "Iogurte grego com castanhas",
-    image: "/placeholder.svg?height=80&width=80",
-    time: "16:20",
-    calories: 280,
-    protein: 20,
-    carbs: 15,
-    fat: 18,
-    tags: ["Alto em proteína", "Probióticos"],
-    estimatedByAI: true,
-  },
-];
-
-const mealTypes = [
-  "Café da manhã",
-  "Lanche da manhã",
-  "Almoço",
-  "Lanche da tarde",
-  "Jantar",
-  "Ceia",
-];
-
 export default function MealsPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [listMeals, setlistMeals] = useState<MealType[] | null>(null);
 
   const router = useRouter();
 
@@ -145,6 +95,22 @@ export default function MealsPage() {
       transition: { duration: 0.5, ease: easeOut },
     },
   };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        console.log("🚀 ~ MealsPage ~ selectedDate:", selectedDate);
+        const data = await MealsApi.list({
+          // se sua API aceitar filtro por data, envie aqui
+          date: selectedDate, // exemplo: '2025-08-30'
+        });
+        console.log("🚀 ~ MealsPage ~ data:", data);
+        setlistMeals(data);
+      } catch (error) {
+        console.error("Erro ao buscar refeições:", error);
+      }
+    })();
+  }, [selectedDate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -223,7 +189,7 @@ export default function MealsPage() {
           </motion.div>
 
           {/* Meals List */}
-          {mockMeals.length === 0 ? (
+          {listMeals && listMeals.length === 0 ? (
             <div
               className="flex flex-col items-center justify-center py-16 text-center"
               style={{ opacity: 0.3 }}
@@ -236,81 +202,99 @@ export default function MealsPage() {
               variants={itemVariants}
               className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
             >
-              {mockMeals.map((meal, index) => (
-                <motion.div
-                  key={meal.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="group hover:shadow-lg transition-all duration-300 border-border/50 bg-gradient-to-br from-card to-card/50 overflow-hidden">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          {/* Substitua por next/image para melhor performance */}
-                          <Image
-                            src={meal.image || "/placeholder.svg"}
-                            alt={meal.name}
-                            className="w-16 h-16 rounded-lg object-cover ring-2 ring-primary/10"
-                            width={1000}
-                            height={1000}
-                          />
-                          <div>
-                            <CardTitle className="text-lg">
-                              {meal.name}
-                            </CardTitle>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="w-3 h-3" />
-                              {meal.time}
+              {listMeals
+                ? listMeals.map((meal, index) => (
+                    <motion.div
+                      key={meal.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="group hover:shadow-lg transition-all duration-300 border-border/50 bg-gradient-to-br from-card to-card/50 overflow-hidden">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              {/* Substitua por next/image para melhor performance */}
+                              <Image
+                                src={meal.imgUrl || "/placeholder.svg"}
+                                alt={meal.type}
+                                className="w-16 h-16 rounded-lg object-cover ring-2 ring-primary/10"
+                                width={1000}
+                                height={1000}
+                              />
+                              <div>
+                                <CardTitle className="text-lg">
+                                  {meal.type}
+                                </CardTitle>
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Clock className="w-3 h-3" />
+                                  {meal?.hourMeal &&
+                                    new Date(meal.hourMeal).toLocaleTimeString(
+                                      "pt-BR",
+                                      {
+                                        timeZone: "America/Sao_Paulo",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: false,
+                                      }
+                                    )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
+                        </CardHeader>
 
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground">
-                        {meal.description}
-                      </p>
+                        <CardContent className="space-y-4">
+                          <p className="text-sm text-muted-foreground">
+                            {meal.description}
+                          </p>
 
-                      {/* Nutrientes */}
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Zap className="w-3 h-3 text-orange-500" />
-                          <span>{meal.calories} kcal</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Beef className="w-3 h-3 text-red-500" />
-                          <span>{meal.protein}g prot.</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Wheat className="w-3 h-3 text-yellow-500" />
-                          <span>{meal.carbs}g carb.</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Droplets className="w-3 h-3 text-blue-500" />
-                          <span>{meal.fat}g gord.</span>
-                        </div>
-                      </div>
+                          {/* Nutrientes */}
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Zap className="w-3 h-3 text-orange-500" />
+                              <span>
+                                {meal?.AssessmentMeals?.calories} kcal
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Beef className="w-3 h-3 text-red-500" />
+                              <span>
+                                {meal?.AssessmentMeals?.proteinsGrams}g prot.
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Wheat className="w-3 h-3 text-yellow-500" />
+                              <span>
+                                {meal?.AssessmentMeals?.carbsGrams}g carb.
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Droplets className="w-3 h-3 text-blue-500" />
+                              <span>
+                                {meal?.AssessmentMeals?.fatsGrams}g gord.
+                              </span>
+                            </div>
+                          </div>
 
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1">
+                          {/* Tags */}
+                          {/* <div className="flex flex-wrap gap-1">
                         {meal.tags.map((tag) => (
                           <Badge
                             key={tag}
@@ -329,11 +313,12 @@ export default function MealsPage() {
                             IA
                           </Badge>
                         )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                      </div> */}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))
+                : ""}
             </motion.div>
           )}
         </motion.div>

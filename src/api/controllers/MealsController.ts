@@ -6,6 +6,7 @@ import { GeminiApi } from "@/service/Api/GeminiApi";
 import GeminiConstants from "@/utils/GeminiContants";
 import mime from "mime-types";
 import Prisma from "@/service/Prisma";
+import { create } from "domain";
 
 export default class MealsController {
   static async createMeal(req: NextApiRequest, res: NextApiResponse) {
@@ -68,5 +69,50 @@ export default class MealsController {
       console.error("Error creating meal:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
+  }
+  static async list(req: NextApiRequest, res: NextApiResponse) {
+    const page = Number(req.query.page) || 1;
+    const size = Number(req.query.size) || 10;
+    const search = (req.query.search as string) || "";
+
+    const date = req.query.date ? new Date(req.query.date as string) : null;
+
+    const searchTerms = search
+      ? search
+          .split(",")
+          .map((term) => term.trim())
+          .filter(Boolean)
+      : [];
+
+    const where: any = {};
+
+    if (searchTerms.length > 0) {
+      where.OR = searchTerms.map((term) => ({
+        description: { contains: term, mode: "insensitive" },
+      }));
+    }
+
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      where.hourMeal = {
+        gte: startOfDay,
+        lte: endOfDay,
+      };
+    }
+
+    const listMeals = await Prisma.meals.findMany({
+      where,
+      skip: (page - 1) * size,
+      take: size,
+      include: { AssessmentMeals: true },
+      orderBy: { hourMeal: "asc" },
+    });
+
+    return res.status(200).json(listMeals);
   }
 }

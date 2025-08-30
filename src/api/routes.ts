@@ -24,7 +24,8 @@ export default function routes(
     PhysicalAssessmentController.createPhysicalAssessment
   );
 
-  api.post("/meal", auth(), file(), MealsController.createMeal);
+  api.post("/meal", auth(), MealsController.createMeal);
+  api.get("/meal", auth(), MealsController.list);
 
   api.post("attachments", auth(), file(), AttachmentController.create);
 
