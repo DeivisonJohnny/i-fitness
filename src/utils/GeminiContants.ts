@@ -122,4 +122,35 @@ O resultado da sua análise DEVE ser estritamente um objeto JSON bem-formado, se
 `;
     return promptTemplate.trim();
   }
+
+  static createMealAssessmentPrompt(description: string): string {
+    const promptTemplate = `
+Você é um nutricionista especialista em IA. Sua tarefa é analisar a imagem de uma refeição e a descrição fornecida pelo usuário para estimar os valores nutricionais com a maior precisão possível.
+
+A sua resposta DEVE SER ESTRITAMENTE um objeto JSON bem-formado. Não inclua NENHUM texto introdutório, explicações, comentários ou formatação markdown. A resposta deve ser apenas o JSON.
+
+**Instruções para Análise:**
+
+1.  **Análise da Imagem:** Identifique cada alimento presente na imagem. Estime o tamanho das porções em gramas ou unidades comuns (ex: "1 filé de frango de 150g", "1 xícara de arroz", "meio abacate").
+2.  **Considerar a Descrição:** Use a descrição do usuário para refinar sua análise. A descrição pode conter informações cruciais que não são visíveis na imagem, como o método de preparo (grelhado, frito, assado), ingredientes de molhos ou temperos, e quantidades específicas.
+3.  **Cálculo Nutricional:** Com base nos alimentos e porções identificados, calcule a estimativa total de calorias, proteínas, carboidratos e gorduras da refeição completa.
+4.  **Formatação Final:** Agregue todos os valores calculados na estrutura JSON especificada abaixo. Os valores devem ser números inteiros, arredondados para o número mais próximo.
+
+**Dados Fornecidos pelo Usuário:**
+
+{
+  "description": "${description}"
+}
+
+**Estrutura Obrigatória do JSON de Saída:**
+
+{
+  "calories": <number_integer>,
+  "proteinsGrams": <number_integer>,
+  "carbsGrams": <number_integer>,
+  "fatsGrams": <number_integer>
+}
+`;
+    return promptTemplate.trim();
+  }
 }

@@ -37,6 +37,7 @@ import Image from "next/image";
 import { typesMealOptions } from "@/lib/enums";
 import MealsApi, { TypeMeal } from "@/service/Api/MealsApi";
 import AttachmentApi from "@/service/Api/AttechmentApi";
+import { toast } from "sonner";
 
 type Nutrients = {
   calories: number;
@@ -134,13 +135,16 @@ export default function AddMeals() {
         });
 
         imageUrl = newAttachment?.url || "";
-        console.log(newAttachment);
       }
 
       const response = await MealsApi.create({
         ...mealData,
         urlImage: imageUrl,
       });
+
+      if (response) {
+        toast.success("Refeição adicionada com sucesso");
+      }
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const newErrors: { [key: string]: string } = {};
@@ -150,7 +154,7 @@ export default function AddMeals() {
         setErrors(newErrors);
         console.log("Erros de validação:", newErrors);
       } else {
-        console.error("Erro ao salvar refeição:", err);
+        toast.error((err as Error).message);
       }
     } finally {
       setIsSubmitting(false);

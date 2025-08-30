@@ -22,6 +22,13 @@ type PhysicalAssessment = {
   generalRecommendations: string;
 };
 
+type MealAssessment = {
+  calories: number;
+  proteinsGrams: number;
+  carbsGrams: number;
+  fatsGrams: number;
+};
+
 export class GeminiApi {
   /**
    * Envia uma imagem de uma refeição e um prompt de texto para o Gemini para análise nutricional.
@@ -30,11 +37,13 @@ export class GeminiApi {
    * @param mimeType O tipo MIME da imagem (ex: "image/jpeg", "image/png").
    * @returns Uma string contendo a análise nutricional da refeição.
    */
+
   static async generateAssessmentMeals(
     prompt: string,
     imageBase64: string,
     mimeType: string
-  ): Promise<string> {
+  ): Promise<MealAssessment> {
+    // <<< TIPO DE RETORNO ATUALIZADO
     try {
       const result = await generativeModel.generateContent({
         contents: [
@@ -62,12 +71,21 @@ export class GeminiApi {
         );
       }
 
-      return responseText;
+      // Limpa a string de possíveis blocos de código markdown e espaços em branco
+      const jsonString = responseText
+        .replace(/^```json\s*|```\s*$/g, "")
+        .trim();
+
+      // Parseia a string para um objeto JSON
+      const assessmentData: MealAssessment = JSON.parse(jsonString);
+
+      return assessmentData; // <<< RETORNA O OBJETO JSON PRONTO
     } catch (error) {
       console.error(
         "Erro ao processar a avaliação de refeições da API Gemini:",
         error
       );
+      // Se o erro for de parsing (JSON inválido), a mensagem será mais clara.
       throw error;
     }
   }
