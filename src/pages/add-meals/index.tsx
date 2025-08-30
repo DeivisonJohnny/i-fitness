@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import type React from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { useRouter } from "next/navigation";
 import * as Yup from "yup";
@@ -17,6 +18,8 @@ import {
   Droplets,
   Save,
   X,
+  CheckCircle,
+  ArrowLeft,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -35,7 +38,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 import { typesMealOptions } from "@/lib/enums";
-import MealsApi, { TypeMeal } from "@/service/Api/MealsApi";
+import MealsApi from "@/service/Api/MealsApi";
 import AttachmentApi from "@/service/Api/AttechmentApi";
 import { toast } from "sonner";
 
@@ -44,6 +47,29 @@ type Nutrients = {
   protein?: number;
   carbs?: number;
   fat?: number;
+};
+
+type MealAssessment = {
+  id: string;
+  calories: number;
+  proteinsGrams: number;
+  carbsGrams: number;
+  fatsGrams: number;
+  mealId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SavedMeal = {
+  id: string;
+  imgUrl: string;
+  type: string;
+  hourMeal: string;
+  description: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  AssessmentMeals: MealAssessment;
 };
 
 const mealValidationSchema = Yup.object({
@@ -93,6 +119,9 @@ export default function AddMeals() {
     Partial<Nutrients>
   >({});
 
+  const [savedMeal, setSavedMeal] = useState<SavedMeal | null>(null);
+  const [showAssessment, setShowAssessment] = useState(false);
+
   const handleChange = (field: string, value: string | File | null) => {
     if (errors[field]) {
       setErrors((prev) => {
@@ -141,8 +170,11 @@ export default function AddMeals() {
         ...mealData,
         urlImage: imageUrl,
       });
+      console.log("🚀 ~ handleSaveMeal ~ response:", response);
 
       if (response) {
+        setSavedMeal(response);
+        setShowAssessment(true);
         toast.success("Refeição adicionada com sucesso");
       }
     } catch (err) {
@@ -159,6 +191,19 @@ export default function AddMeals() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAddAnotherMeal = () => {
+    setShowAssessment(false);
+    setSavedMeal(null);
+    setMealData({
+      type: "",
+      description: "",
+      time: format(new Date(), "HH:mm"),
+      imageFile: null,
+    });
+    setImagePreviewUrl("");
+    setErrors({});
   };
 
   const containerVariants = {
@@ -181,6 +226,171 @@ export default function AddMeals() {
     },
   };
 
+  const AssessmentView = () => {
+    if (!savedMeal?.AssessmentMeals) return null;
+
+    const assessment = savedMeal.AssessmentMeals;
+    const mealTypeLabel =
+      typesMealOptions[savedMeal.type as keyof typeof typesMealOptions] ||
+      savedMeal.type;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center">
+            <CheckCircle className="w-16 h-16 text-green-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">
+            Refeição Avaliada com Sucesso!
+          </h2>
+          <p className="text-muted-foreground">
+            Sua {mealTypeLabel.toLowerCase()} foi analisada e aqui está o resumo
+            nutricional
+          </p>
+        </div>
+
+        <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg">
+          <CardContent className="space-y-6 py-6">
+            {savedMeal.imgUrl && (
+              <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                <Image
+                  src={savedMeal.imgUrl || "/placeholder.svg"}
+                  alt="Refeição salva"
+                  className="w-full h-full object-cover"
+                  width={1000}
+                  height={1000}
+                />
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-foreground">Tipo:</span>
+                <span className="text-muted-foreground">{mealTypeLabel}</span>
+              </div>
+
+              {savedMeal.description && (
+                <div className="space-y-2">
+                  <span className="font-medium text-foreground">
+                    Descrição:
+                  </span>
+                  <p className="text-muted-foreground text-sm">
+                    {savedMeal.description}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-foreground">Horário:</span>
+                <span className="text-muted-foreground">
+                  {format(new Date(savedMeal.hourMeal), "HH:mm")}
+                </span>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Análise Nutricional
+              </h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Flame className="w-3 h-3 text-orange-500" />
+                      Calorias
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {assessment.calories} kcal
+                    </span>
+                  </div>
+                  <Progress
+                    value={(assessment.calories / 1000) * 100}
+                    className="h-2"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Beef className="w-3 h-3 text-red-500" />
+                      Proteínas
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {assessment.proteinsGrams}g
+                    </span>
+                  </div>
+                  <Progress
+                    value={(assessment.proteinsGrams / 100) * 100}
+                    className="h-2"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Wheat className="w-3 h-3 text-yellow-500" />
+                      Carboidratos
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {assessment.carbsGrams}g
+                    </span>
+                  </div>
+                  <Progress
+                    value={(assessment.carbsGrams / 200) * 100}
+                    className="h-2"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
+                      <Droplets className="w-3 h-3 text-blue-500" />
+                      Gorduras
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {assessment.fatsGrams}g
+                    </span>
+                  </div>
+                  <Progress
+                    value={(assessment.fatsGrams / 80) * 100}
+                    className="h-2"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button
+                onClick={handleAddAnotherMeal}
+                className="flex-1 bg-black shadow-md border-[0.1px] border-white/40 dark:text-white"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Adicionar Outra Refeição
+              </Button>
+              <Button
+                onClick={() => router.push("/meals")}
+                variant="outline"
+                className="flex-1 border-border/50 bg-transparent"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Ver Todas as Refeições
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-foreground via-foreground to-muted/80 dark:bg-gradient-to-br dark:from-background dark:via-background dark:to-muted/20 py-8">
       <motion.div
@@ -192,272 +402,286 @@ export default function AddMeals() {
         <motion.div variants={itemVariants} className="mb-8">
           <div className="flex items-center justify-center mb-4">
             <h1 className="text-3xl font-bold dark:bg-gradient-to-r dark:from-foreground dark:to-foreground/80 dark:bg-clip-text dark:text-transparent  text-black   ">
-              Adicionar Refeição
+              {showAssessment ? "Avaliação da Refeição" : "Adicionar Refeição"}
             </h1>
             <div className="w-10" />
           </div>
           <p className="text-lg text-muted-foreground text-center max-w-xl mx-auto">
-            Envie uma foto e descreva sua refeição para obter estimativas
-            nutricionais com IA.
+            {showAssessment
+              ? "Confira a análise nutricional da sua refeição"
+              : "Envie uma foto e descreva sua refeição para obter estimativas nutricionais com IA."}
           </p>
         </motion.div>
 
         <motion.div variants={itemVariants}>
-          <form onSubmit={handleSaveMeal}>
-            <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg">
-              <CardContent className="space-y-8 py-6">
-                <div className="space-y-4 text-center">
-                  <Label
-                    htmlFor="image-upload"
-                    className="block text-lg font-semibold  text-black dark:text-foreground"
-                  >
-                    Foto da Refeição
-                  </Label>
-                  <div
-                    className="relative border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary/50 transition-colors group"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      ref={fileInputRef}
-                    />
-                    {imagePreviewUrl ? (
-                      <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                        <Image
-                          src={imagePreviewUrl}
-                          alt="Preview da Refeição"
-                          className="w-full h-full object-cover"
-                          width={1000}
-                          height={1000}
-                        />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Camera className="w-8 h-8 text-white" />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-3 py-4">
-                        <Upload className="w-12 h-12 mx-auto text-muted-foreground/60" />
-                        <p className="text-sm text-muted-foreground">
-                          <span className="font-medium text-primary">
-                            Clique para enviar
-                          </span>{" "}
-                          ou arraste e solte
-                        </p>
-                        <p className="text-xs text-muted-foreground/80">
-                          Tire uma foto ou envie uma imagem do seu prato
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  {errors.imageFile && (
-                    <div className="text-red-500 text-sm text-left">
-                      {errors.imageFile}
-                    </div>
-                  )}
-                </div>
-
-                <Separator />
-
-                <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-back dark:text-foreground flex items-center gap-2">
-                    <Utensils className="w-5 h-5 dark:text-primary" />
-                    Detalhes da Refeição
-                  </h3>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="mealType"
-                      className="flex items-center gap-1"
-                    >
-                      Tipo de Refeição
-                    </Label>
-
-                    <Select
-                      value={mealData.type}
-                      onValueChange={(value) => handleChange("type", value)}
-                    >
-                      <SelectTrigger
-                        id="mealType"
-                        className={errors.type ? "border-red-500" : ""}
+          <AnimatePresence mode="wait">
+            {showAssessment ? (
+              <AssessmentView />
+            ) : (
+              <form onSubmit={handleSaveMeal}>
+                <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg">
+                  <CardContent className="space-y-8 py-6">
+                    <div className="space-y-4 text-center">
+                      <Label
+                        htmlFor="image-upload"
+                        className="block text-lg font-semibold  text-black dark:text-foreground"
                       >
-                        <SelectValue placeholder="Selecione o tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(typesMealOptions).map(
-                          ([key, label]) => {
-                            return (
-                              <SelectItem key={key} value={key}>
-                                {label}
-                              </SelectItem>
-                            );
-                          }
+                        Foto da Refeição
+                      </Label>
+                      <div
+                        className="relative border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary/50 transition-colors group"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          ref={fileInputRef}
+                        />
+                        {imagePreviewUrl ? (
+                          <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                            <Image
+                              src={imagePreviewUrl || "/placeholder.svg"}
+                              alt="Preview da Refeição"
+                              className="w-full h-full object-cover"
+                              width={1000}
+                              height={1000}
+                            />
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Camera className="w-8 h-8 text-white" />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-3 py-4">
+                            <Upload className="w-12 h-12 mx-auto text-muted-foreground/60" />
+                            <p className="text-sm text-muted-foreground">
+                              <span className="font-medium text-primary">
+                                Clique para enviar
+                              </span>{" "}
+                              ou arraste e solte
+                            </p>
+                            <p className="text-xs text-muted-foreground/80">
+                              Tire uma foto ou envie uma imagem do seu prato
+                            </p>
+                          </div>
                         )}
-                      </SelectContent>
-                    </Select>
-                    {errors.type && (
-                      <div className="text-red-500 text-sm">{errors.type}</div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="mealTime"
-                      className="flex items-center gap-1"
-                    >
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      Horário (Opcional)
-                    </Label>
-                    <Input
-                      id="mealTime"
-                      type="time"
-                      value={mealData.time}
-                      onChange={(e) => handleChange("time", e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="description"
-                      className="flex items-center gap-1"
-                    >
-                      <BookOpen className="w-4 h-4 text-muted-foreground" />
-                      Descrição da Refeição (Opcional)
-                    </Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Ex: arroz integral, peito de frango grelhado, salada de alface, tomate e pepino..."
-                      rows={8}
-                      value={mealData.description}
-                      onChange={(e) =>
-                        handleChange("description", e.target.value)
-                      }
-                    />
-                    {errors.description && (
-                      <div className="text-red-500 text-sm">
-                        {errors.description}
                       </div>
-                    )}
-                  </div>
-                </div>
+                      {errors.imageFile && (
+                        <div className="text-red-500 text-sm text-left">
+                          {errors.imageFile}
+                        </div>
+                      )}
+                    </div>
 
-                <AnimatePresence mode="wait">
-                  {estimationState === "success" && estimatedNutrients && (
-                    <motion.div
-                      key="estimation-success"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="space-y-6"
-                    >
-                      <Separator />
-                      <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-primary" />
-                        Estimativa Nutricional
+                    <Separator />
+
+                    <div className="space-y-6">
+                      <h3 className="text-xl font-semibold text-back dark:text-foreground flex items-center gap-2">
+                        <Utensils className="w-5 h-5 dark:text-primary" />
+                        Detalhes da Refeição
                       </h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Flame className="w-3 h-3 text-orange-500" />
-                              Calorias
-                            </span>
-                            <span className="font-medium text-foreground">
-                              {estimatedNutrients.calories} kcal
-                            </span>
-                          </div>
-                          <Progress
-                            value={
-                              ((estimatedNutrients.calories ?? 0) / 1000) * 100
-                            }
-                            className="h-2"
-                          />
-                        </div>
 
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Beef className="w-3 h-3 text-red-500" />
-                              Proteínas
-                            </span>
-                            <span className="font-medium text-foreground">
-                              {estimatedNutrients.protein}g
-                            </span>
-                          </div>
-                          <Progress
-                            value={
-                              ((estimatedNutrients.protein ?? 0) / 100) * 100
-                            }
-                            className="h-2"
-                          />
-                        </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="mealType"
+                          className="flex items-center gap-1"
+                        >
+                          Tipo de Refeição
+                        </Label>
 
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Wheat className="w-3 h-3 text-yellow-500" />
-                              Carboidratos
-                            </span>
-                            <span className="font-medium text-foreground">
-                              {estimatedNutrients.carbs}g
-                            </span>
+                        <Select
+                          value={mealData.type}
+                          onValueChange={(value) => handleChange("type", value)}
+                        >
+                          <SelectTrigger
+                            id="mealType"
+                            className={errors.type ? "border-red-500" : ""}
+                          >
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(typesMealOptions).map(
+                              ([key, label]) => {
+                                return (
+                                  <SelectItem key={key} value={key}>
+                                    {label}
+                                  </SelectItem>
+                                );
+                              }
+                            )}
+                          </SelectContent>
+                        </Select>
+                        {errors.type && (
+                          <div className="text-red-500 text-sm">
+                            {errors.type}
                           </div>
-                          <Progress
-                            value={
-                              ((estimatedNutrients.carbs ?? 0) / 200) * 100
-                            }
-                            className="h-2"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground flex items-center gap-1">
-                              <Droplets className="w-3 h-3 text-blue-500" />
-                              Gorduras
-                            </span>
-                            <span className="font-medium text-foreground">
-                              {estimatedNutrients.fat}g
-                            </span>
-                          </div>
-                          <Progress
-                            value={((estimatedNutrients.fat ?? 0) / 80) * 100}
-                            className="h-2"
-                          />
-                        </div>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground text-center mt-4">
-                        Estimado automaticamente com IA. Pode conter variações.
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
 
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-1 bg-black shadow-md border-[0.1px] border-white/40 dark:text-white"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {isSubmitting ? "Salvando..." : "Salvar Refeição"}
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => router.push("/meals")}
-                    variant="outline"
-                    className="flex-1 border-border/50 bg-transparent"
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Cancelar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </form>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="mealTime"
+                          className="flex items-center gap-1"
+                        >
+                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          Horário (Opcional)
+                        </Label>
+                        <Input
+                          id="mealTime"
+                          type="time"
+                          value={mealData.time}
+                          onChange={(e) => handleChange("time", e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="description"
+                          className="flex items-center gap-1"
+                        >
+                          <BookOpen className="w-4 h-4 text-muted-foreground" />
+                          Descrição da Refeição (Opcional)
+                        </Label>
+                        <Textarea
+                          id="description"
+                          placeholder="Ex: arroz integral, peito de frango grelhado, salada de alface, tomate e pepino..."
+                          rows={8}
+                          value={mealData.description}
+                          onChange={(e) =>
+                            handleChange("description", e.target.value)
+                          }
+                        />
+                        {errors.description && (
+                          <div className="text-red-500 text-sm">
+                            {errors.description}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <AnimatePresence mode="wait">
+                      {estimationState === "success" && estimatedNutrients && (
+                        <motion.div
+                          key="estimation-success"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          className="space-y-6"
+                        >
+                          <Separator />
+                          <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-primary" />
+                            Estimativa Nutricional
+                          </h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Flame className="w-3 h-3 text-orange-500" />
+                                  Calorias
+                                </span>
+                                <span className="font-medium text-foreground">
+                                  {estimatedNutrients.calories} kcal
+                                </span>
+                              </div>
+                              <Progress
+                                value={
+                                  ((estimatedNutrients.calories ?? 0) / 1000) *
+                                  100
+                                }
+                                className="h-2"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Beef className="w-3 h-3 text-red-500" />
+                                  Proteínas
+                                </span>
+                                <span className="font-medium text-foreground">
+                                  {estimatedNutrients.protein}g
+                                </span>
+                              </div>
+                              <Progress
+                                value={
+                                  ((estimatedNutrients.protein ?? 0) / 100) *
+                                  100
+                                }
+                                className="h-2"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Wheat className="w-3 h-3 text-yellow-500" />
+                                  Carboidratos
+                                </span>
+                                <span className="font-medium text-foreground">
+                                  {estimatedNutrients.carbs}g
+                                </span>
+                              </div>
+                              <Progress
+                                value={
+                                  ((estimatedNutrients.carbs ?? 0) / 200) * 100
+                                }
+                                className="h-2"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Droplets className="w-3 h-3 text-blue-500" />
+                                  Gorduras
+                                </span>
+                                <span className="font-medium text-foreground">
+                                  {estimatedNutrients.fat}g
+                                </span>
+                              </div>
+                              <Progress
+                                value={
+                                  ((estimatedNutrients.fat ?? 0) / 80) * 100
+                                }
+                                className="h-2"
+                              />
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground text-center mt-4">
+                            Estimado automaticamente com IA. Pode conter
+                            variações.
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1 bg-black shadow-md border-[0.1px] border-white/40 dark:text-white"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        {isSubmitting ? "Salvando..." : "Salvar Refeição"}
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => router.push("/meals")}
+                        variant="outline"
+                        className="flex-1 border-border/50 bg-transparent"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Cancelar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </form>
+            )}
+          </AnimatePresence>
         </motion.div>
       </motion.div>
     </div>
