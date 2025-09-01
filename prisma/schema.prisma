@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgres"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -33,11 +33,11 @@ enum Sex {
 }
 
 enum PhysicalActivityLevel {
-  Sedentario          @map("Pouco ou nenhum exercício, trabalho majoritariamente sentado")
-  Levemente_Ativo     @map("Caminhadas ocasionais, atividade leve 1–2x por semana")
-  Moderadamente_Ativo @map("Exercícios moderados 3–5x por semana")
-  Muito_Ativo         @map("Exercícios intensos 6–7x por semana")
-  Extremamente_Ativo  @map("Atividade física pesada diariamente ou trabalho físico exigente (ex: pedreiro, atleta etc.)")
+  Sedentario  @map("Pouco ou nenhum exercício, trabalho majoritariamente sentado")
+  Leve        @map("Caminhadas ocasionais, atividade leve 1–2x por semana")
+  Moderado    @map("Exercícios moderados 3–5x por semana")
+  Muito_Ativo @map("Exercícios intensos 6–7x por semana")
+  Extremo     @map("Atividade física pesada diariamente ou trabalho físico exigente (ex: pedreiro, atleta etc.)")
 }
 
 enum Objective {
@@ -47,23 +47,23 @@ enum Objective {
 }
 
 enum TypeTraining {
-  Nenhuma               @map("Nenhuma")
-  Musculacao            @map("Musculação")
-  Cardio_Aerobico       @map("Cardio / Aeróbico")
-  Treinamento_Funcional @map("Treinamento funcional")
-  HIIT                  @map("HIIT (Treino Intervalado de Alta Intensidade)")
+  Nenhuma    @map("Nenhuma")
+  Musculacao @map("Musculação")
+  Cardio     @map("Cardio / Aeróbico")
+  Funcional  @map("Treinamento funcional")
+  HIIT       @map("HIIT (Treino Intervalado de Alta Intensidade)")
   Crossfit
   Pilates
   Yoga
   Corrida
   Caminhada
   Ciclismo
-  Natacao               @map("Natação")
-  Esportes_Coletivos    @map("Esportes coletivos (futebol, vôlei, basquete etc.)")
-  Danca_Zumba           @map("Dança / Zumba")
-  Lutas_Artes_Marcial   @map("Lutas / Artes marciais (jiu-jitsu, muay thai, boxe etc.)")
-  Treino_Em_Casa        @map("Treino em casa (sem equipamentos)")
-  Outros                @map("Outros (campo de texto para personalizar)")
+  Natacao    @map("Natação")
+  Esportes   @map("Esportes coletivos (futebol, vôlei, basquete etc.)")
+  Danca      @map("Dança / Zumba")
+  Lutas      @map("Lutas / Artes marciais (jiu-jitsu, muay thai, boxe etc.)")
+  Casa       @map("Treino em casa (sem equipamentos)")
+  Outros     @map("Outros (campo de texto para personalizar)")
 }
 
 model Meals {
