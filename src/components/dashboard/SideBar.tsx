@@ -40,11 +40,11 @@ const menuItems = [
     url: "/add-meals",
     icon: FileText,
   },
-  {
-    title: "Histórico",
-    url: "/history",
-    icon: BarChart3,
-  },
+  // {
+  //   title: "Histórico",
+  //   url: "/history",
+  //   icon: BarChart3,
+  // },
   {
     title: "Meu Perfil",
     url: "/profile",

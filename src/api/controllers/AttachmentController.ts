@@ -5,9 +5,7 @@ import fs from "fs";
 export class AttachmentController {
   static async create(req: NextApiRequest, res: NextApiResponse) {
     try {
-      const id = (req as any).userId;
-      const data = req.body;
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const file = (req as any).file;
 
       if (!file) {

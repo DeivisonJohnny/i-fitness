@@ -1,8 +1,6 @@
 import { TypesMeal } from "@prisma/client";
 import Api from ".";
 import { SavedMeal } from "@/pages/add-meals";
-import { useQuery } from "../QueryClient";
-import { date } from "yup";
 
 export interface Paginate<T> {
   data: T[];
@@ -26,6 +24,7 @@ export type MealType = {
   time: string;
   imageFile?: File;
   imgUrl?: string;
+  urlImage?: string;
   hourMeal?: Date;
   AssessmentMeals?: AssessmentMealsType;
 };
@@ -37,7 +36,7 @@ export type AssessmentMealsType = {
   carbsGrams: number;
   fatsGrams: number;
 
-  mealId?: String;
+  mealId?: string;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -49,7 +48,7 @@ export type WeekCaloriesType = {
 };
 
 export default class MealsApi {
-  static async create(data: MealType | any): Promise<SavedMeal> {
+  static async create(data: MealType): Promise<SavedMeal> {
     return Api.post("/meal", data);
   }
 

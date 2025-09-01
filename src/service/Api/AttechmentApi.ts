@@ -1,5 +1,4 @@
 import Api from ".";
-import { queryClient } from "../QueryClient";
 
 export type Attachment = {
   id?: string;
@@ -25,39 +24,6 @@ export type CreateOrUpdateAttachment = {
   file: File;
 };
 
-function updateQueryCache(
-  modelId: string,
-  model: string,
-  attachment: Attachment
-) {
-  let modelKey = "";
-  switch (model) {
-    case "order":
-      modelKey = "orders";
-      break;
-    case "project":
-      modelKey = "projects";
-      break;
-    case "expense":
-      modelKey = "expenses";
-      break;
-    case "withdrawPartner":
-      modelKey = "withdraws-partner";
-      break;
-    case "user":
-      modelKey = "users";
-      break;
-  }
-
-  const queryKey = [modelKey, modelId];
-  const data = queryClient.getQueryData<{ attachments?: Attachment[] }>(
-    queryKey
-  );
-  if (data) {
-    queryClient.setQueryData(queryKey, data);
-  }
-}
-
 export default class AttachmentApi {
   static async create(attachment: CreateOrUpdateAttachment) {
     const formData = new FormData();
@@ -71,12 +37,6 @@ export default class AttachmentApi {
       }
     }
     const newAttachment = await Api.post<Attachment>("attachments", formData);
-
-    updateQueryCache(
-      attachment.modelId,
-      attachment.model,
-      newAttachment as Attachment
-    );
 
     return newAttachment as Attachment;
   }

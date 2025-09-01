@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence, easeOut, Variants } from "framer-motion";
+import { motion, easeOut, Variants } from "framer-motion";
 import {
   Plus,
   Calendar,
   Edit3,
   Trash2,
-  Camera,
-  Sparkles,
   Clock,
   Zap,
   Beef,
@@ -16,60 +14,23 @@ import {
   Droplets,
   ChevronLeft,
   ChevronRight,
-  Bot,
-  Upload,
-  Loader2,
 } from "lucide-react";
 import { format, addDays, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+
 import Image from "next/image";
 import { useRouter } from "next/router";
-import MealsApi, { MealType, Paginate } from "@/service/Api/MealsApi";
-
-// Tipagem para nutrientes estimados
-interface EstimatedNutrientsType {
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-}
-
-interface NewMealType {
-  type: string;
-  description: string;
-  time: string;
-  image: File | null;
-}
+import MealsApi, { MealType } from "@/service/Api/MealsApi";
 
 export default function MealsPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());

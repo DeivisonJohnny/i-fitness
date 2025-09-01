@@ -41,6 +41,7 @@ import { typesMealOptions } from "@/lib/enums";
 import MealsApi from "@/service/Api/MealsApi";
 import AttachmentApi from "@/service/Api/AttechmentApi";
 import { toast } from "sonner";
+import { TypesMeal } from "@prisma/client";
 
 type Nutrients = {
   calories: number;
@@ -83,13 +84,12 @@ const mealValidationSchema = Yup.object({
     .test(
       "fileSize",
       "O arquivo é muito grande (máximo 5MB)",
-      // @ts-ignore
-      (value) => !value || (value && value.size <= 50 * 1024 * 1024) // 5MB
+      // @ts-expect-error O 'value' é 'mixed', o TS não infere a propriedade 'size'.
+      (value) => !value || (value && value.size <= 5 * 1024 * 1024) // 5MB
     )
     .test(
       "fileType",
       "Formato de arquivo não suportado",
-      // @ts-ignore
       (value) =>
         !value ||
         (value &&
@@ -167,7 +167,9 @@ export default function AddMeals() {
       }
 
       const response = await MealsApi.create({
-        ...mealData,
+        description: mealData.description,
+        time: mealData.time,
+        type: mealData.type as TypesMeal,
         urlImage: imageUrl,
       });
       console.log("🚀 ~ handleSaveMeal ~ response:", response);

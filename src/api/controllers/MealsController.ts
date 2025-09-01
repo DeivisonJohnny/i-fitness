@@ -6,12 +6,11 @@ import { GeminiApi } from "@/service/Api/GeminiApi";
 import GeminiConstants from "@/utils/GeminiContants";
 import mime from "mime-types";
 import Prisma from "@/service/Prisma";
-import { create } from "domain";
 
 export default class MealsController {
   static async createMeal(req: NextApiRequest, res: NextApiResponse) {
     try {
-      const id = (req as any).userId;
+      const id = req.userId;
       const data = req.body;
 
       if (!data || !data.urlImage) {
@@ -83,7 +82,7 @@ export default class MealsController {
           .map((term) => term.trim())
           .filter(Boolean)
       : [];
-
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const where: any = {};
 
     if (searchTerms.length > 0) {

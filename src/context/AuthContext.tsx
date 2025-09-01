@@ -19,7 +19,6 @@ import {
 import { LoadingOutlined } from "@ant-design/icons";
 import { toast } from "sonner";
 import Api from "@/service/Api";
-import { Toaster } from "@/components/ui/sonner";
 import { PhysicalAssessmentApi } from "@/service/Api/PhysicalAssessmentApi";
 
 function Loader() {
