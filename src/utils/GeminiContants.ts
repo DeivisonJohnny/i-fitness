@@ -36,13 +36,13 @@ export default class GeminiConstants {
     const activityLevelMap: Record<PhysicalActivityLevel, string> = {
       [PhysicalActivityLevel.Sedentario]:
         "Sedentário (Pouco ou nenhum exercício, trabalho majoritariamente sentado)",
-      [PhysicalActivityLevel.Levemente_Ativo]:
+      [PhysicalActivityLevel.Leve]:
         "Levemente Ativo (Caminhadas ocasionais, atividade leve 1–2x por semana)",
-      [PhysicalActivityLevel.Moderadamente_Ativo]:
+      [PhysicalActivityLevel.Moderado]:
         "Moderadamente Ativo (Exercícios moderados 3–5x por semana)",
       [PhysicalActivityLevel.Muito_Ativo]:
         "Muito Ativo (Exercícios intensos 6–7x por semana)",
-      [PhysicalActivityLevel.Extremamente_Ativo]:
+      [PhysicalActivityLevel.Extremo]:
         "Extremamente Ativo (Atividade física pesada diariamente ou trabalho físico exigente)",
     };
 
