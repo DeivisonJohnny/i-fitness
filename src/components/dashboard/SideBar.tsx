@@ -63,9 +63,9 @@ export function SidebarDashboard() {
             <BarChart3 className="h-4 w-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">Sistema RH</span>
+            <span className="truncate font-semibold">I Fitness</span>
             <span className="truncate text-xs text-muted-foreground">
-              Avaliação de Performance
+              Avaliação de sua alimentação
             </span>
           </div>
         </div>
