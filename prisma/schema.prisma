@@ -33,37 +33,37 @@ enum Sex {
 }
 
 enum PhysicalActivityLevel {
-  Sedentario  @map("Pouco ou nenhum exercício, trabalho majoritariamente sentado")
-  Leve        @map("Caminhadas ocasionais, atividade leve 1–2x por semana")
-  Moderado    @map("Exercícios moderados 3–5x por semana")
-  Muito_Ativo @map("Exercícios intensos 6–7x por semana")
-  Extremo     @map("Atividade física pesada diariamente ou trabalho físico exigente (ex: pedreiro, atleta etc.)")
+  Sedentario  @map("Pouco_exercicio") // <63 chars
+  Leve        @map("Atividade_leve") // <63 chars
+  Moderado    @map("Exercicio_moderado") // <63 chars
+  Muito_Ativo @map("Exercicio_intenso") // <63 chars
+  Extremo     @map("Fisico_exigente") // <63 chars
 }
 
 enum Objective {
-  Perder_peso  @map("Perder peso")
-  Manter_peso  @map("Manter peso")
-  Ganhar_massa @map("Ganhar massa")
+  Perder_peso  @map("Perder")
+  Manter_peso  @map("Manter")
+  Ganhar_massa @map("Ganhar")
 }
 
 enum TypeTraining {
   Nenhuma    @map("Nenhuma")
-  Musculacao @map("Musculação")
-  Cardio     @map("Cardio / Aeróbico")
-  Funcional  @map("Treinamento funcional")
-  HIIT       @map("HIIT (Treino Intervalado de Alta Intensidade)")
-  Crossfit
-  Pilates
-  Yoga
-  Corrida
-  Caminhada
-  Ciclismo
-  Natacao    @map("Natação")
-  Esportes   @map("Esportes coletivos (futebol, vôlei, basquete etc.)")
-  Danca      @map("Dança / Zumba")
-  Lutas      @map("Lutas / Artes marciais (jiu-jitsu, muay thai, boxe etc.)")
-  Casa       @map("Treino em casa (sem equipamentos)")
-  Outros     @map("Outros (campo de texto para personalizar)")
+  Musculacao @map("Musculacao")
+  Cardio     @map("Cardio")
+  Funcional  @map("Funcional")
+  HIIT       @map("HIIT")
+  Crossfit   @map("Crossfit")
+  Pilates    @map("Pilates")
+  Yoga       @map("Yoga")
+  Corrida    @map("Corrida")
+  Caminhada  @map("Caminhada")
+  Ciclismo   @map("Ciclismo")
+  Natacao    @map("Natacao")
+  Esportes   @map("Esportes")
+  Danca      @map("Danca")
+  Lutas      @map("Lutas")
+  Casa       @map("Casa")
+  Outros     @map("Outros")
 }
 
 model Meals {
@@ -83,12 +83,12 @@ model Meals {
 }
 
 enum TypesMeal {
-  CAFE_DA_MANHA @map("Café da manhã")
-  ALMOCO        @map("Almoço")
+  CAFE_DA_MANHA @map("Cafe")
+  ALMOCO        @map("Almoco")
   JANTAR        @map("Jantar")
   LANCHE        @map("Lanche")
-  PRE_TREINO    @map("Pré-treino")
-  POS_TREINO    @map("Pós-treino")
+  PRE_TREINO    @map("PreTreino")
+  POS_TREINO    @map("PosTreino")
   CEIA          @map("Ceia")
   OUTRO         @map("Outro")
 }
