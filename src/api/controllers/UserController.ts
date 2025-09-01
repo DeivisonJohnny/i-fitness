@@ -78,6 +78,7 @@ export default class UserController {
           physical_activity_level: true,
           type_training: true,
           physicalAssessment: true,
+          meals: true,
         },
       });
 

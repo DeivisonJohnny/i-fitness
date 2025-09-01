@@ -115,4 +115,77 @@ export default class MealsController {
 
     return res.status(200).json(listMeals);
   }
+
+  static async findMealsToday(req: NextApiRequest, res: NextApiResponse) {
+    const id = req.userId;
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const mealsToday = await Prisma.meals.findMany({
+      where: {
+        userId: id,
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
+      include: {
+        AssessmentMeals: true,
+      },
+    });
+
+    return res.json(mealsToday);
+  }
+
+  static async findWeeklyCalories(req: NextApiRequest, res: NextApiResponse) {
+    try {
+      const id = req.userId;
+
+      const today = new Date();
+
+      const firstDayOfWeek = new Date(today);
+      firstDayOfWeek.setDate(today.getDate() - today.getDay());
+      firstDayOfWeek.setHours(0, 0, 0, 0);
+
+      const lastDayOfWeek = new Date(firstDayOfWeek);
+      lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+      lastDayOfWeek.setHours(23, 59, 59, 999);
+
+      const meals = await Prisma.meals.findMany({
+        where: {
+          userId: id,
+          createdAt: {
+            gte: firstDayOfWeek,
+            lte: lastDayOfWeek,
+          },
+        },
+        select: {
+          AssessmentMeals: true,
+          createdAt: true,
+        },
+      });
+
+      const daysOfWeek = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+      const weeklyData = daysOfWeek.map((day) => ({ day, calories: 0 }));
+
+      const dayMap = [6, 0, 1, 2, 3, 4, 5];
+
+      meals.forEach((meal) => {
+        const dayIndex = dayMap[meal.createdAt.getDay()];
+        const calories = meal.AssessmentMeals?.calories ?? 0;
+        weeklyData[dayIndex].calories += calories;
+      });
+
+      return res.status(200).json(weeklyData);
+    } catch (error) {
+      console.error(error);
+      return res
+        .status(500)
+        .json({ message: "Erro ao buscar refeições da semana." });
+    }
+  }
 }

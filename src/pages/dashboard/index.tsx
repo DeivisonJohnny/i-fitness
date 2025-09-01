@@ -9,10 +9,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
-import { Plus, Zap, Beef, Wheat, Droplets } from "lucide-react";
+import { Zap, Beef, Wheat, Droplets } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -23,69 +23,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "@/hooks/useTheme";
 import Image from "next/image";
-
-// Dados mockados
-const nutritionData = {
-  calories: { consumed: 1850, target: 2200 },
-  protein: { consumed: 95, target: 120 },
-  carbs: { consumed: 220, target: 275 },
-  fat: { consumed: 65, target: 80 },
-};
-
-const weeklyData = [
-  { day: "Seg", calories: 2100 },
-  { day: "Ter", calories: 1950 },
-  { day: "Qua", calories: 2300 },
-  { day: "Qui", calories: 1850 },
-  { day: "Sex", calories: 2050 },
-  { day: "Sáb", calories: 2400 },
-  { day: "Dom", calories: 1900 },
-];
-
-const meals = [
-  {
-    id: 1,
-    name: "Café da Manhã",
-    time: "08:30",
-    image: "/placeholder.svg?height=60&width=60",
-    calories: 420,
-    protein: 18,
-    carbs: 45,
-    fat: 15,
-  },
-  {
-    id: 2,
-    name: "Almoço",
-    time: "12:45",
-    image: "/placeholder.svg?height=60&width=60",
-    calories: 680,
-    protein: 35,
-    carbs: 85,
-    fat: 22,
-  },
-  {
-    id: 3,
-    name: "Lanche",
-    time: "16:20",
-    image: "/placeholder.svg?height=60&width=60",
-    calories: 250,
-    protein: 12,
-    carbs: 30,
-    fat: 8,
-  },
-  {
-    id: 4,
-    name: "Jantar",
-    time: "19:15",
-    image: "/placeholder.svg?height=60&width=60",
-    calories: 500,
-    protein: 30,
-    carbs: 60,
-    fat: 20,
-  },
-];
+import { useEffect, useState } from "react";
+import MealsApi, { MealType, WeekCaloriesType } from "@/service/Api/MealsApi";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function DashboardPage() {
+  const [meals, setMeals] = useState<MealType[]>([]);
+  const [caloriesConsumed, setCaloriesConsumed] = useState(0);
+  const [proteinsGrams, setProteinsGrams] = useState(0);
+  const [carbs, setCarbs] = useState(0);
+  const [fats, setFats] = useState(0);
+  const [weeklyCalories, setWeeklyCalories] = useState<WeekCaloriesType[]>([]);
+  const { me } = useAuth();
   const { theme } = useTheme();
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -96,7 +45,6 @@ export default function DashboardPage() {
       },
     },
   };
-
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -107,15 +55,43 @@ export default function DashboardPage() {
       },
     },
   };
+  useEffect(() => {
+    (async () => {
+      try {
+        const mealsToday = await MealsApi.findMealsToday();
+        const weekCalories = await MealsApi.findWeeklyCalories();
+        const totalCalories = mealsToday.reduce(
+          (sum, item) => sum + (item.AssessmentMeals?.calories ?? 0),
+          0
+        );
+        const totalProteins = mealsToday.reduce(
+          (sum, item) => sum + (item.AssessmentMeals?.proteinsGrams ?? 0),
+          0
+        );
+        const totalCarbs = mealsToday.reduce(
+          (sum, item) => sum + (item.AssessmentMeals?.carbsGrams ?? 0),
+          0
+        );
+        const totalFats = mealsToday.reduce(
+          (sum, item) => sum + (item.AssessmentMeals?.fatsGrams ?? 0),
+          0
+        );
+        setCaloriesConsumed(totalCalories);
+        setProteinsGrams(totalProteins);
+        setCarbs(totalCarbs);
+        setFats(totalFats);
+        setMeals(mealsToday);
+        setWeeklyCalories(weekCalories);
+      } catch (error) {
+        console.log("🚀 ~ DashboardPage ~ error:", error);
+      }
+    })();
+  }, []);
 
   return (
     <div className={`min-h-screen ${theme}`}>
       <div className="flex min-h-screen bg-slate-950 dark:bg-background">
-        {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          {/* Header */}
-
-          {/* Dashboard Content */}
           <main className="flex-1 p-6 overflow-auto">
             <motion.div
               variants={containerVariants}
@@ -123,131 +99,134 @@ export default function DashboardPage() {
               animate="visible"
               className="space-y-6"
             >
-              {/* Nutrition Summary Cards */}
               <motion.div
                 variants={itemVariants}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
               >
-                <Card className="bg-slate-900 dark:bg-card border-border">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Calorias
-                    </CardTitle>
-                    <Zap className="h-4 w-4 text-orange-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
-                      {nutritionData.calories.consumed}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      de {nutritionData.calories.target} kcal
-                    </p>
-                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full"
-                        style={{
-                          width: `${
-                            (nutritionData.calories.consumed /
-                              nutritionData.calories.target) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                {me?.physicalAssessment?.dailyCaloricTarget && (
+                  <Card className="bg-slate-900 dark:bg-card border-border">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Calorias
+                      </CardTitle>
+                      <Zap className="h-4 w-4 text-orange-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-foreground">
+                        {caloriesConsumed}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        de {me?.physicalAssessment?.dailyCaloricTarget} kcal
+                      </p>
+                      <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                        <div
+                          className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full"
+                          style={{
+                            width: `${
+                              (caloriesConsumed /
+                                me?.physicalAssessment?.dailyCaloricTarget) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                <Card className="bg-slate-900 dark:bg-card border-border">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Proteínas
-                    </CardTitle>
-                    <Beef className="h-4 w-4 text-red-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
-                      {nutritionData.protein.consumed}g
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      de {nutritionData.protein.target}g
-                    </p>
-                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-gradient-to-r from-red-500 to-pink-500 h-2 rounded-full"
-                        style={{
-                          width: `${
-                            (nutritionData.protein.consumed /
-                              nutritionData.protein.target) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                {me?.physicalAssessment?.proteinsGrams && (
+                  <Card className="bg-slate-900 dark:bg-card border-border">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Proteínas
+                      </CardTitle>
+                      <Beef className="h-4 w-4 text-red-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-foreground">
+                        {proteinsGrams}g
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        de {me.physicalAssessment.proteinsGrams}g
+                      </p>
+                      <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                        <div
+                          className="bg-gradient-to-r from-red-500 to-pink-500 h-2 rounded-full"
+                          style={{
+                            width: `${
+                              (proteinsGrams /
+                                me?.physicalAssessment?.proteinsGrams) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                <Card className="bg-slate-900 dark:bg-card border-border">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Carboidratos
-                    </CardTitle>
-                    <Wheat className="h-4 w-4 text-yellow-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
-                      {nutritionData.carbs.consumed}g
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      de {nutritionData.carbs.target}g
-                    </p>
-                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full"
-                        style={{
-                          width: `${
-                            (nutritionData.carbs.consumed /
-                              nutritionData.carbs.target) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                {me?.physicalAssessment?.carbohydratesGrams && (
+                  <Card className="bg-slate-900 dark:bg-card border-border">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Carboidratos
+                      </CardTitle>
+                      <Wheat className="h-4 w-4 text-yellow-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-foreground">
+                        {carbs}g
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        de {me?.physicalAssessment?.carbohydratesGrams}g
+                      </p>
+                      <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                        <div
+                          className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full"
+                          style={{
+                            width: `${
+                              (carbs /
+                                me?.physicalAssessment?.carbohydratesGrams) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                <Card className="bg-slate-900 dark:bg-card border-border">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
-                      Gorduras
-                    </CardTitle>
-                    <Droplets className="h-4 w-4 text-blue-500" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
-                      {nutritionData.fat.consumed}g
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      de {nutritionData.fat.target}g
-                    </p>
-                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
-                      <div
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
-                        style={{
-                          width: `${
-                            (nutritionData.fat.consumed /
-                              nutritionData.fat.target) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                {me?.physicalAssessment?.fatsGrams && (
+                  <Card className="bg-slate-900 dark:bg-card border-border">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium text-muted-foreground">
+                        Gorduras
+                      </CardTitle>
+                      <Droplets className="h-4 w-4 text-blue-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-foreground">
+                        {fats}g
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        de {me?.physicalAssessment?.fatsGrams}g
+                      </p>
+                      <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
+                          style={{
+                            width: `${
+                              (fats / me?.physicalAssessment?.fatsGrams) * 100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </motion.div>
 
-              {/* Chart and Meals Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Weekly Chart */}
                 <motion.div variants={itemVariants}>
                   <Card className="bg-slate-900 dark:bg-card border-border">
                     <CardHeader>
@@ -260,13 +239,27 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={weeklyData}>
+                        <BarChart data={weeklyCalories}>
                           <CartesianGrid
                             strokeDasharray="3 3"
                             stroke="#374151"
                           />
                           <XAxis dataKey="day" stroke="#9CA3AF" fontSize={12} />
-                          <YAxis stroke="#9CA3AF" fontSize={12} />
+                          <YAxis
+                            stroke="#9CA3AF"
+                            fontSize={12}
+                            domain={[
+                              0,
+                              (dataMax) =>
+                                Math.max(
+                                  dataMax,
+                                  Number(
+                                    me?.physicalAssessment
+                                      ?.dailyCaloricTarget || 0
+                                  )
+                                ) * 1.1,
+                            ]}
+                          />
                           <Tooltip
                             contentStyle={{
                               backgroundColor: "#1F2937",
@@ -280,6 +273,21 @@ export default function DashboardPage() {
                             fill="url(#gradient)"
                             radius={[4, 4, 0, 0]}
                           />
+                          {me?.physicalAssessment?.dailyCaloricTarget && (
+                            <ReferenceLine
+                              y={Number(
+                                me.physicalAssessment.dailyCaloricTarget
+                              )}
+                              stroke="#F87171"
+                              strokeDasharray="4 4"
+                              label={{
+                                value: "Meta diária",
+                                position: "insideTopRight",
+                                fill: "#F87171",
+                                fontSize: 12,
+                              }}
+                            />
+                          )}
                           <defs>
                             <linearGradient
                               id="gradient"
@@ -298,7 +306,6 @@ export default function DashboardPage() {
                   </Card>
                 </motion.div>
 
-                {/* Meals List */}
                 <motion.div variants={itemVariants}>
                   <Card className="bg-slate-900 dark:bg-card border-border">
                     <CardHeader>
@@ -319,8 +326,8 @@ export default function DashboardPage() {
                           className="flex items-center gap-4 p-3 rounded-lg bg-slate-800 dark:bg-accent/50"
                         >
                           <Image
-                            src={meal.image || "/placeholder.svg"}
-                            alt={meal.name}
+                            src={meal.imgUrl || "/placeholder.svg"}
+                            alt={meal.type}
                             className="w-12 h-12 rounded-lg object-cover"
                             width={1000}
                             height={1000}
@@ -328,7 +335,7 @@ export default function DashboardPage() {
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
                               <h4 className="font-medium text-foreground">
-                                {meal.name}
+                                {meal.type}
                               </h4>
                               <span className="text-sm text-muted-foreground">
                                 {meal.time}
@@ -336,16 +343,16 @@ export default function DashboardPage() {
                             </div>
                             <div className="flex gap-2 mt-1">
                               <Badge variant="secondary" className="text-xs">
-                                {meal.calories} kcal
+                                {meal.AssessmentMeals?.calories} kcal
                               </Badge>
                               <Badge variant="outline" className="text-xs">
-                                P: {meal.protein}g
+                                P: {meal.AssessmentMeals?.proteinsGrams}g
                               </Badge>
                               <Badge variant="outline" className="text-xs">
-                                C: {meal.carbs}g
+                                C: {meal.AssessmentMeals?.carbsGrams}g
                               </Badge>
                               <Badge variant="outline" className="text-xs">
-                                G: {meal.fat}g
+                                G: {meal.AssessmentMeals?.fatsGrams}g
                               </Badge>
                             </div>
                           </div>

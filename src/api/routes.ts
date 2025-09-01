@@ -26,6 +26,8 @@ export default function routes(
 
   api.post("/meal", auth(), MealsController.createMeal);
   api.get("/meal", auth(), MealsController.list);
+  api.get("/meal/today", auth(), MealsController.findMealsToday);
+  api.get("/meal/calories", auth(), MealsController.findWeeklyCalories);
 
   api.post("attachments", auth(), file(), AttachmentController.create);
 

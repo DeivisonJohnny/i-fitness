@@ -43,6 +43,11 @@ export type AssessmentMealsType = {
   updatedAt?: Date;
 };
 
+export type WeekCaloriesType = {
+  day: string;
+  calories: number;
+};
+
 export default class MealsApi {
   static async create(data: MealType | any): Promise<SavedMeal> {
     return Api.post("/meal", data);
@@ -68,5 +73,13 @@ export default class MealsApi {
         date: args?.date,
       },
     });
+  }
+
+  static async findMealsToday(): Promise<MealType[]> {
+    return Api.get("/meal/today");
+  }
+
+  static async findWeeklyCalories(): Promise<WeekCaloriesType[]> {
+    return Api.get("/meal/calories");
   }
 }
