@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next/types";
 import path from "path";
 import fs from "fs";
+import os from "os"; // Adicionado
 
 export class AttachmentController {
   static async create(req: NextApiRequest, res: NextApiResponse) {
@@ -12,7 +13,7 @@ export class AttachmentController {
         return res.status(400).json({ error: "Nenhum arquivo enviado" });
       }
 
-      const uploadDir = path.join(process.cwd(), "public", "uploads/meals/");
+      const uploadDir = path.join(os.tmpdir(), "uploads/meals/");
       if (!fs.existsSync(uploadDir)) {
         fs.mkdirSync(uploadDir, { recursive: true });
       }

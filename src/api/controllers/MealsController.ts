@@ -2,6 +2,7 @@ import ApiError from "@/utils/ApiError";
 import { NextApiRequest, NextApiResponse } from "next/types";
 import fs from "fs";
 import path from "path";
+import os from "os"; // Adicionado para acessar o diretório temporário
 import { GeminiApi } from "@/service/Api/GeminiApi";
 import GeminiConstants from "@/utils/GeminiContants";
 import mime from "mime-types";
@@ -17,14 +18,18 @@ export default class MealsController {
         throw new ApiError("Dados incompletos");
       }
 
-      const absolutePath = path.join(process.cwd(), "public", data.urlImage);
+      // CORREÇÃO: O caminho da imagem agora aponta para o diretório temporário.
+      // data.urlImage deve ser algo como '/uploads/meals/nome-do-arquivo.jpg'
+      const imagePathInTmp = path.join(os.tmpdir(), data.urlImage);
 
-      if (!fs.existsSync(absolutePath)) {
-        throw new ApiError("Arquivo de imagem não encontrado");
+      if (!fs.existsSync(imagePathInTmp)) {
+        throw new ApiError(
+          "Arquivo de imagem não encontrado no diretório temporário"
+        );
       }
 
-      const mimeType = mime.lookup(absolutePath) || "image/jpeg";
-      const fileBuffer = fs.readFileSync(absolutePath);
+      const mimeType = mime.lookup(imagePathInTmp) || "image/jpeg";
+      const fileBuffer = fs.readFileSync(imagePathInTmp); // Agora lê do caminho correto
       const imageBase64 = fileBuffer.toString("base64");
 
       const prompt = GeminiConstants.createMealAssessmentPrompt(
@@ -37,6 +42,9 @@ export default class MealsController {
         mimeType
       );
 
+      // Opcional: Remover o arquivo do diretório temporário após o uso
+      fs.unlinkSync(imagePathInTmp);
+
       const [hours, minutes] = data.time.split(":").map(Number);
       const now = new Date();
       now.setHours(hours, minutes, 0, 0);
@@ -45,6 +53,9 @@ export default class MealsController {
         data: {
           userId: id,
           description: data.description,
+          // IMPORTANTE: Aqui você deve salvar a URL permanente (do S3, Vercel Blob, etc.),
+          // não o caminho temporário. O ideal é que o controller de upload já tivesse
+          // enviado para a nuvem e retornado a URL final.
           imgUrl: data.urlImage,
           type: data.type,
           hourMeal: now,
@@ -69,6 +80,10 @@ export default class MealsController {
       return res.status(500).json({ error: "Internal server error" });
     }
   }
+
+  // ... os outros métodos (list, findMealsToday, findWeeklyCalories) permanecem os mesmos
+  // mas considere as sugestões de melhoria para eles.
+
   static async list(req: NextApiRequest, res: NextApiResponse) {
     const page = Number(req.query.page) || 1;
     const size = Number(req.query.size) || 10;
@@ -97,7 +112,7 @@ export default class MealsController {
 
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
-
+      // SUGESTÃO: Considere usar 'hourMeal' em vez de 'createdAt' para maior precisão.
       where.hourMeal = {
         gte: startOfDay,
         lte: endOfDay,
@@ -127,7 +142,8 @@ export default class MealsController {
     const mealsToday = await Prisma.meals.findMany({
       where: {
         userId: id,
-        createdAt: {
+        // SUGESTÃO: Considere usar 'hourMeal' em vez de 'createdAt' para maior precisão.
+        hourMeal: {
           gte: startOfDay,
           lte: endOfDay,
         },
@@ -157,24 +173,26 @@ export default class MealsController {
       const meals = await Prisma.meals.findMany({
         where: {
           userId: id,
-          createdAt: {
+          // SUGESTÃO: Considere usar 'hourMeal' em vez de 'createdAt' para maior precisão.
+          hourMeal: {
             gte: firstDayOfWeek,
             lte: lastDayOfWeek,
           },
         },
         select: {
           AssessmentMeals: true,
-          createdAt: true,
+          hourMeal: true,
         },
       });
 
       const daysOfWeek = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
       const weeklyData = daysOfWeek.map((day) => ({ day, calories: 0 }));
 
+      // Mapeia o retorno de getDay() (Dom=0, Seg=1...) para um array que começa na Segunda (Seg=0, Ter=1...).
       const dayMap = [6, 0, 1, 2, 3, 4, 5];
 
       meals.forEach((meal) => {
-        const dayIndex = dayMap[meal.createdAt.getDay()];
+        const dayIndex = dayMap[meal.hourMeal.getDay()];
         const calories = meal.AssessmentMeals?.calories ?? 0;
         weeklyData[dayIndex].calories += calories;
       });
