@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { TOKEN_KEY } from "@/utils/Constant";
 import RegisterForm from "@/components/RegisterForm";
 import CompletRegister from "@/components/RegisterCompletForm";
+import { InstallButton } from "@/components/InstallPwa";
 
 type Login = {
   email: string;
@@ -98,6 +99,7 @@ export default function AuthPage() {
         <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-black " />
         <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
       </Button>
+      <InstallButton />
 
       <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center relative overflow-hidden bg-[#fefefe] dark:bg-background ">
         <div className="relative z-10 flex flex-col justify-center items-center text-black dark:text-white p-12">
