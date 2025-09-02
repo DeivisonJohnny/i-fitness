@@ -129,11 +129,9 @@ export default function CompletRegister() {
   };
 
   async function handleCompletRegister(data: FormComplementUser) {
-    console.log("🚀 ~ handleCompletRegister ~ data:", data);
-
     try {
       const userUpdated = await UserApi.update(data);
-      console.log("🚀 ~ handleCompletRegister ~ userUpdated:", userUpdated);
+
       if (userUpdated) {
         router.push("/dashboard");
       }
