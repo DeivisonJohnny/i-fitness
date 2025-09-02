@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "tsx src/config/generate-credentials.ts && next build",
     "start": "next start",
     "lint": "next lint",
+    "setup:credentials": "tsx src/config/generate-credentials.ts",
     "db:push": "prisma db push",
     "db:save": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
@@ -79,6 +80,7 @@
     "prisma": "^6.13.0",
     "tailwindcss": "^4.1.11",
     "ts-node": "^10.9.2",
+    "tsx": "^4.15.7",
     "tw-animate-css": "^1.3.6",
     "typescript": "^5.8.3"
   }
