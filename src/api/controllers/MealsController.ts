@@ -1,11 +1,8 @@
-// /pages/api/meals.ts (ou onde seu controller está)
-
 import ApiError from "@/utils/ApiError";
 import { NextApiRequest, NextApiResponse } from "next/types";
 import { GeminiApi } from "@/service/Api/GeminiApi";
 import GeminiConstants from "@/utils/GeminiContants";
 import Prisma from "@/service/Prisma";
-// REMOVA as importações de 'fs', 'path', 'os', e 'mime-types'
 
 export default class MealsController {
   static async createMeal(req: NextApiRequest, res: NextApiResponse) {

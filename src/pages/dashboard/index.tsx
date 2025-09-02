@@ -103,127 +103,122 @@ export default function DashboardPage() {
                 variants={itemVariants}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
               >
-                {me?.physicalAssessment?.dailyCaloricTarget && (
-                  <Card className="bg-slate-900 dark:bg-card border-border">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Calorias
-                      </CardTitle>
-                      <Zap className="h-4 w-4 text-orange-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-foreground">
-                        {caloriesConsumed}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        de {me?.physicalAssessment?.dailyCaloricTarget} kcal
-                      </p>
-                      <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
-                        <div
-                          className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full"
-                          style={{
-                            width: `${
-                              (caloriesConsumed /
-                                me?.physicalAssessment?.dailyCaloricTarget) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                <Card className="bg-slate-900 dark:bg-card border-border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Calorias
+                    </CardTitle>
+                    <Zap className="h-4 w-4 text-orange-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">
+                      {caloriesConsumed}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      de {me?.physicalAssessment?.dailyCaloricTarget} kcal
+                    </p>
+                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                      <div
+                        className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full"
+                        style={{
+                          width: `${
+                            (caloriesConsumed /
+                              (me?.physicalAssessment?.dailyCaloricTarget ??
+                                0)) *
+                            100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {me?.physicalAssessment?.proteinsGrams && (
-                  <Card className="bg-slate-900 dark:bg-card border-border">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Proteínas
-                      </CardTitle>
-                      <Beef className="h-4 w-4 text-red-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-foreground">
-                        {proteinsGrams}g
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        de {me.physicalAssessment.proteinsGrams}g
-                      </p>
-                      <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
-                        <div
-                          className="bg-gradient-to-r from-red-500 to-pink-500 h-2 rounded-full"
-                          style={{
-                            width: `${
-                              (proteinsGrams /
-                                me?.physicalAssessment?.proteinsGrams) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                <Card className="bg-slate-900 dark:bg-card border-border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Proteínas
+                    </CardTitle>
+                    <Beef className="h-4 w-4 text-red-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">
+                      {proteinsGrams}g
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      de {me?.physicalAssessment?.proteinsGrams}g
+                    </p>
+                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                      <div
+                        className="bg-gradient-to-r from-red-500 to-pink-500 h-2 rounded-full"
+                        style={{
+                          width: `${
+                            (proteinsGrams /
+                              (me?.physicalAssessment?.proteinsGrams ?? 0)) *
+                            100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {me?.physicalAssessment?.carbohydratesGrams && (
-                  <Card className="bg-slate-900 dark:bg-card border-border">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Carboidratos
-                      </CardTitle>
-                      <Wheat className="h-4 w-4 text-yellow-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-foreground">
-                        {carbs}g
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        de {me?.physicalAssessment?.carbohydratesGrams}g
-                      </p>
-                      <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
-                        <div
-                          className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full"
-                          style={{
-                            width: `${
-                              (carbs /
-                                me?.physicalAssessment?.carbohydratesGrams) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                <Card className="bg-slate-900 dark:bg-card border-border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Carboidratos
+                    </CardTitle>
+                    <Wheat className="h-4 w-4 text-yellow-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">
+                      {carbs}g
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      de {me?.physicalAssessment?.carbohydratesGrams}g
+                    </p>
+                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                      <div
+                        className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full"
+                        style={{
+                          width: `${
+                            (carbs /
+                              (me?.physicalAssessment?.carbohydratesGrams ??
+                                0)) *
+                            100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {me?.physicalAssessment?.fatsGrams && (
-                  <Card className="bg-slate-900 dark:bg-card border-border">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Gorduras
-                      </CardTitle>
-                      <Droplets className="h-4 w-4 text-blue-500" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-foreground">
-                        {fats}g
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        de {me?.physicalAssessment?.fatsGrams}g
-                      </p>
-                      <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
-                        <div
-                          className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
-                          style={{
-                            width: `${
-                              (fats / me?.physicalAssessment?.fatsGrams) * 100
-                            }%`,
-                          }}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                <Card className="bg-slate-900 dark:bg-card border-border">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Gorduras
+                    </CardTitle>
+                    <Droplets className="h-4 w-4 text-blue-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-foreground">
+                      {fats}g
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      de {me?.physicalAssessment?.fatsGrams}g
+                    </p>
+                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                      <div
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
+                        style={{
+                          width: `${
+                            (fats / (me?.physicalAssessment?.fatsGrams ?? 1)) *
+                            100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
               </motion.div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
