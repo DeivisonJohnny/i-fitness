@@ -1,12 +1,11 @@
+// /pages/api/meals.ts (ou onde seu controller está)
+
 import ApiError from "@/utils/ApiError";
 import { NextApiRequest, NextApiResponse } from "next/types";
-import fs from "fs";
-import path from "path";
-import os from "os"; // Adicionado para acessar o diretório temporário
 import { GeminiApi } from "@/service/Api/GeminiApi";
 import GeminiConstants from "@/utils/GeminiContants";
-import mime from "mime-types";
 import Prisma from "@/service/Prisma";
+// REMOVA as importações de 'fs', 'path', 'os', e 'mime-types'
 
 export default class MealsController {
   static async createMeal(req: NextApiRequest, res: NextApiResponse) {
@@ -14,22 +13,25 @@ export default class MealsController {
       const id = req.userId;
       const data = req.body;
 
-      if (!data || !data.urlImage) {
-        throw new ApiError("Dados incompletos");
-      }
-
-      // CORREÇÃO: O caminho da imagem agora aponta para o diretório temporário.
-      // data.urlImage deve ser algo como '/uploads/meals/nome-do-arquivo.jpg'
-      const imagePathInTmp = path.join(os.tmpdir(), data.urlImage);
-
-      if (!fs.existsSync(imagePathInTmp)) {
+      // A validação agora checa por uma URL válida
+      if (!data || !data.urlImage || !data.urlImage.startsWith("http")) {
         throw new ApiError(
-          "Arquivo de imagem não encontrado no diretório temporário"
+          "URL da imagem é inválida ou não foi fornecida",
+          400
         );
       }
 
-      const mimeType = mime.lookup(imagePathInTmp) || "image/jpeg";
-      const fileBuffer = fs.readFileSync(imagePathInTmp); // Agora lê do caminho correto
+      // 1. FAZER O DOWNLOAD DA IMAGEM A PARTIR DA URL PÚBLICA
+      const imageResponse = await fetch(data.urlImage);
+      if (!imageResponse.ok) {
+        throw new ApiError("Falha ao buscar a imagem da URL fornecida", 500);
+      }
+
+      // 2. OBTER OS DADOS DA IMAGEM PARA O GEMINI
+      const mimeType =
+        imageResponse.headers.get("content-type") || "image/jpeg";
+      const imageArrayBuffer = await imageResponse.arrayBuffer();
+      const fileBuffer = Buffer.from(imageArrayBuffer);
       const imageBase64 = fileBuffer.toString("base64");
 
       const prompt = GeminiConstants.createMealAssessmentPrompt(
@@ -42,9 +44,6 @@ export default class MealsController {
         mimeType
       );
 
-      // Opcional: Remover o arquivo do diretório temporário após o uso
-      fs.unlinkSync(imagePathInTmp);
-
       const [hours, minutes] = data.time.split(":").map(Number);
       const now = new Date();
       now.setHours(hours, minutes, 0, 0);
@@ -53,13 +52,10 @@ export default class MealsController {
         data: {
           userId: id,
           description: data.description,
-          // IMPORTANTE: Aqui você deve salvar a URL permanente (do S3, Vercel Blob, etc.),
-          // não o caminho temporário. O ideal é que o controller de upload já tivesse
-          // enviado para a nuvem e retornado a URL final.
+          // 3. SALVAR A URL PÚBLICA E PERMANENTE NO BANCO DE DADOS
           imgUrl: data.urlImage,
           type: data.type,
           hourMeal: now,
-
           AssessmentMeals: {
             create: {
               calories: resultAssessment.calories,
@@ -74,10 +70,14 @@ export default class MealsController {
         },
       });
 
+      // Retornar o objeto completo da refeição criada
       return res.status(201).json(meal);
     } catch (error) {
       console.error("Error creating meal:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      const statusCode = error instanceof ApiError ? error.status : 500;
+      const message =
+        error instanceof Error ? error.message : "Internal server error";
+      return res.status(statusCode).json({ error: message });
     }
   }
 
