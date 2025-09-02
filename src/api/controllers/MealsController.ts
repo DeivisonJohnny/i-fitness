@@ -13,7 +13,6 @@ export default class MealsController {
       const id = req.userId;
       const data = req.body;
 
-      // A validação agora checa por uma URL válida
       if (!data || !data.urlImage || !data.urlImage.startsWith("http")) {
         throw new ApiError(
           "URL da imagem é inválida ou não foi fornecida",
@@ -21,13 +20,11 @@ export default class MealsController {
         );
       }
 
-      // 1. FAZER O DOWNLOAD DA IMAGEM A PARTIR DA URL PÚBLICA
       const imageResponse = await fetch(data.urlImage);
       if (!imageResponse.ok) {
         throw new ApiError("Falha ao buscar a imagem da URL fornecida", 500);
       }
 
-      // 2. OBTER OS DADOS DA IMAGEM PARA O GEMINI
       const mimeType =
         imageResponse.headers.get("content-type") || "image/jpeg";
       const imageArrayBuffer = await imageResponse.arrayBuffer();
@@ -52,7 +49,6 @@ export default class MealsController {
         data: {
           userId: id,
           description: data.description,
-          // 3. SALVAR A URL PÚBLICA E PERMANENTE NO BANCO DE DADOS
           imgUrl: data.urlImage,
           type: data.type,
           hourMeal: now,
@@ -70,7 +66,6 @@ export default class MealsController {
         },
       });
 
-      // Retornar o objeto completo da refeição criada
       return res.status(201).json(meal);
     } catch (error) {
       console.error("Error creating meal:", error);
@@ -80,9 +75,6 @@ export default class MealsController {
       return res.status(statusCode).json({ error: message });
     }
   }
-
-  // ... os outros métodos (list, findMealsToday, findWeeklyCalories) permanecem os mesmos
-  // mas considere as sugestões de melhoria para eles.
 
   static async list(req: NextApiRequest, res: NextApiResponse) {
     const page = Number(req.query.page) || 1;
@@ -112,7 +104,6 @@ export default class MealsController {
 
       const endOfDay = new Date(date);
       endOfDay.setHours(23, 59, 59, 999);
-      // SUGESTÃO: Considere usar 'hourMeal' em vez de 'createdAt' para maior precisão.
       where.hourMeal = {
         gte: startOfDay,
         lte: endOfDay,
@@ -142,7 +133,6 @@ export default class MealsController {
     const mealsToday = await Prisma.meals.findMany({
       where: {
         userId: id,
-        // SUGESTÃO: Considere usar 'hourMeal' em vez de 'createdAt' para maior precisão.
         hourMeal: {
           gte: startOfDay,
           lte: endOfDay,
@@ -173,7 +163,6 @@ export default class MealsController {
       const meals = await Prisma.meals.findMany({
         where: {
           userId: id,
-          // SUGESTÃO: Considere usar 'hourMeal' em vez de 'createdAt' para maior precisão.
           hourMeal: {
             gte: firstDayOfWeek,
             lte: lastDayOfWeek,
@@ -188,7 +177,6 @@ export default class MealsController {
       const daysOfWeek = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
       const weeklyData = daysOfWeek.map((day) => ({ day, calories: 0 }));
 
-      // Mapeia o retorno de getDay() (Dom=0, Seg=1...) para um array que começa na Segunda (Seg=0, Ter=1...).
       const dayMap = [6, 0, 1, 2, 3, 4, 5];
 
       meals.forEach((meal) => {
