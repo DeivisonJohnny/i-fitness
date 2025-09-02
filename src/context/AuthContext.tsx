@@ -117,10 +117,12 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
           if (!physicalAssessment && isRegisterCompleteForMe) {
             const resultAssessment = await PhysicalAssessmentApi.create();
-            if (resultAssessment) {
-              toast.success("Avaliação física inicial criada com sucesso.");
+            if (resultAssessment instanceof Error) {
+              toast.error("Erro ao criar avaliação física inicial.", {
+                description: resultAssessment.message,
+              });
             } else {
-              toast.error("Erro ao criar avaliação física inicial.");
+              toast.success("Avaliação física inicial criada com sucesso.");
             }
           }
 
