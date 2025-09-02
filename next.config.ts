@@ -10,6 +10,16 @@ const withPWA = require("next-pwa")({
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.vercel-storage.com", // Permite qualquer subdomínio do vercel-storage.com
+        port: "",
+        pathname: "/**", // Permite qualquer caminho de arquivo
+      },
+    ],
+  },
 };
 
 export default withPWA(nextConfig);
