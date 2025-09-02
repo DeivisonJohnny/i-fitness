@@ -13,32 +13,25 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export const usePWAInstall = () => {
-  // Estado para armazenar o evento que aciona o prompt
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  // Estado para verificar se o PWA já foi instalado (ou se o banner foi dispensado)
+
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
-      // Previne que o mini-infobar padrão do Chrome apareça
       event.preventDefault();
 
-      // Armazena o evento para que possa ser acionado mais tarde.
       setInstallPrompt(event as BeforeInstallPromptEvent);
     };
 
-    // Ouve o evento que indica que o PWA pode ser instalado
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // Ouve o evento que indica que a instalação foi concluída
     window.addEventListener("appinstalled", () => {
-      // Limpa o prompt e marca como instalado
       setInstallPrompt(null);
       setIsInstalled(true);
     });
 
-    // Função de limpeza para remover os event listeners
     return () => {
       window.removeEventListener(
         "beforeinstallprompt",
@@ -52,15 +45,12 @@ export const usePWAInstall = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    // Se não houver prompt, não faz nada
     if (!installPrompt) {
       return;
     }
 
-    // Mostra o prompt de instalação
     await installPrompt.prompt();
 
-    // Espera o usuário responder ao prompt
     const { outcome } = await installPrompt.userChoice;
 
     if (outcome === "accepted") {
@@ -70,7 +60,6 @@ export const usePWAInstall = () => {
       console.log("Usuário recusou a instalação do PWA");
     }
 
-    // O prompt só pode ser usado uma vez, então limpamos o estado
     setInstallPrompt(null);
   };
 
