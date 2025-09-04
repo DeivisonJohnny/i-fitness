@@ -21,7 +21,12 @@ export default class UserController {
       }
 
       const newUser = await Prisma.user.create({
-        data: { name, surname, email, password: await Util.hash(password) },
+        data: {
+          name,
+          surname,
+          email,
+          password: await Util.hash(password as string),
+        },
         select: {
           id: true,
           name: true,
@@ -152,7 +157,10 @@ export default class UserController {
       }
 
       const { password, ...user } = userWithPassword;
-      const checkPassword = await Util.checkHash(passwordInput, password);
+      const checkPassword = await Util.checkHash(
+        passwordInput,
+        password as string
+      );
 
       if (!password || !checkPassword) {
         throw new ApiError("Usuario e/ou senha inválida");
