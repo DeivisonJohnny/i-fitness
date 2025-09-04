@@ -98,7 +98,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             invalid: new Error("Token inválido."),
           });
 
-          const { physicalAssessment, ...me } = await UserApi.me({
+          const { physicalAssessment, googleId, ...me } = await UserApi.me({
             email,
             token,
           });
@@ -126,7 +126,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
             }
           }
 
-          setUser({ ...me, physicalAssessment });
+          setUser({ ...me, physicalAssessment, googleId });
           setIsAuthenticated(true);
         }
       } catch (err) {
