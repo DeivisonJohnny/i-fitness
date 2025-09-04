@@ -41,6 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 
-
+firebase-admin.env.json
+firebase.env.json
 gemini.env.json
 .env*.local
