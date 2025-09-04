@@ -9,10 +9,11 @@ datasource db {
 
 model User {
   id                      String                 @id @default(uuid())
+  googleId                String?                @unique
   name                    String
-  surname                 String
+  surname                 String?
   email                   String                 @unique
-  password                String
+  password                String?
   sex                     Sex?
   born                    DateTime?
   height                  Float?
@@ -33,11 +34,11 @@ enum Sex {
 }
 
 enum PhysicalActivityLevel {
-  Sedentario  @map("Pouco_exercicio") // <63 chars
-  Leve        @map("Atividade_leve") // <63 chars
-  Moderado    @map("Exercicio_moderado") // <63 chars
-  Muito_Ativo @map("Exercicio_intenso") // <63 chars
-  Extremo     @map("Fisico_exigente") // <63 chars
+  Sedentario  @map("Pouco_exercicio")
+  Leve        @map("Atividade_leve")
+  Moderado    @map("Exercicio_moderado")
+  Muito_Ativo @map("Exercicio_intenso")
+  Extremo     @map("Fisico_exigente")
 }
 
 enum Objective {
