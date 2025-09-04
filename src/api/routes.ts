@@ -7,6 +7,7 @@ import { PhysicalAssessmentController } from "./controllers/PhysicalAssessmentCo
 import MealsController from "./controllers/MealsController";
 import { file } from "./middlewares/FileUpload";
 import { AttachmentController } from "./controllers/AttachmentController";
+import { GoogleController } from "./controllers/GoogleController";
 
 export default function routes(
   api: NextConnect<NextApiRequest, NextApiResponse>
@@ -17,6 +18,8 @@ export default function routes(
   api.post("/user/me", auth(), UserController.findMe);
   api.put("/user", auth(), UserController.updateUser);
   api.post("/user/auth", UserController.auth);
+
+  api.post("/auth/google", GoogleController.authGoogle);
 
   api.post(
     "/assessment",
