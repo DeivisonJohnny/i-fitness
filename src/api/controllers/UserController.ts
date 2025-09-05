@@ -223,7 +223,7 @@ export default class UserController {
     const end = new Date(year, today.getMonth(), 1);
 
     const months: { date: string; weight: number }[] = [];
-    let cursor = new Date(start);
+    const cursor = new Date(start);
 
     while (cursor <= end) {
       const cursorYear = cursor.getFullYear();

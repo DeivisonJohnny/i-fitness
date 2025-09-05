@@ -172,7 +172,7 @@ export default function ProfilePage() {
                           theme == "dark" ? "#292929" : "#f5f5f5",
                         borderRadius: 10,
                       }}
-                      formatter={(value: any) => [`${value} kg`, "Peso"]}
+                      formatter={(value: number) => [`${value} kg`, "Peso"]}
                     />
                     <Line
                       type="monotone"
