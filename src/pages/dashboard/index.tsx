@@ -89,10 +89,10 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className={`min-h-screen ${theme}`}>
-      <div className="flex min-h-screen  bg-white dark:bg-background">
+    <div className={`min-h-screen `}>
+      <div className="flex min-h-screen ">
         <div className="flex-1 flex flex-col">
-          <main className="flex-1 p-6 overflow-auto bg-[#fff_!important] dark:bg-[#0a0a0a_!important] ">
+          <main className="flex-1 p-6 overflow-auto  ">
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -103,7 +103,7 @@ export default function DashboardPage() {
                 variants={itemVariants}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
               >
-                <Card className=" dark:bg-card border-border">
+                <Card className="  dark:bg-card border-border">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-black dark:text-muted-foreground">
                       Calorias

@@ -47,6 +47,7 @@ export default function CompletRegister() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<"next" | "back">("next");
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const validationSchemaComplement = yup.object().shape({
     sex: yup.string().required("Campo obrigatório"),
@@ -129,6 +130,7 @@ export default function CompletRegister() {
   };
 
   async function handleCompletRegister(data: FormComplementUser) {
+    setIsLoading(true);
     try {
       const userUpdated = await UserApi.update(data);
 
@@ -147,6 +149,8 @@ export default function CompletRegister() {
           description: "Erro desconhecido",
         });
       }
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -446,12 +450,15 @@ export default function CompletRegister() {
               >
                 Voltar
               </Button>
-              <Button
-                type="submit"
-                className="w-full"
-                onClick={() => console.log(errors)}
-              >
-                Cadastrar
+              <Button type="submit" className="w-full">
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Cadastrando...</span>
+                  </div>
+                ) : (
+                  "Cadastrar"
+                )}
               </Button>
             </div>
           </motion.div>

@@ -26,7 +26,9 @@ export function ButtonGoogle() {
       console.log("🚀 ~ handleGoogleSignIn ~ token:", token);
     } catch (error) {
       console.log("🚀 ~ handleGoogleSignIn ~ error:", error);
-      toast.error("Erro inesperado");
+      toast.error("A autenticação falhou", {
+        description: "Tente novamente",
+      });
     }
   };
 

@@ -31,6 +31,7 @@ export default function Layout({ children }: Props) {
       </div>
     );
   }
+
   return (
     <Container className="dark:bg-black bg-[#f3f3f3] h-full ">
       <ThemeProvider
@@ -49,7 +50,7 @@ export default function Layout({ children }: Props) {
             <>
               <Suspense fallback={<LoadPage />}>
                 <SidebarDashboard />
-                <SidebarInset>
+                <SidebarInset className=" bg-[#fff] dark:bg-[#0a0a0a] ">
                   <Header />
                   <Content className=" z-[1]">{children}</Content>
                 </SidebarInset>
