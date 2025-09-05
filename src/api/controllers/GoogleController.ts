@@ -1,4 +1,3 @@
-import FireAdmin from "@/service/FirebaseAdmin";
 import admin from "@/service/FirebaseAdmin";
 import Prisma from "@/service/Prisma";
 import ApiError from "@/utils/ApiError";

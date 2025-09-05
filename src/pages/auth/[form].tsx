@@ -85,10 +85,6 @@ export default function AuthPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Google login");
-  };
-
   return (
     <div className="min-h-screen flex w-full">
       <Button
