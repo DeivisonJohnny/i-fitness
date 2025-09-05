@@ -60,12 +60,9 @@ export default function MealsPage() {
   useEffect(() => {
     (async () => {
       try {
-        console.log("🚀 ~ MealsPage ~ selectedDate:", selectedDate);
         const data = await MealsApi.list({
-          // se sua API aceitar filtro por data, envie aqui
-          date: selectedDate, // exemplo: '2025-08-30'
+          date: selectedDate,
         });
-        console.log("🚀 ~ MealsPage ~ data:", data);
         setlistMeals(data);
       } catch (error) {
         console.error("Erro ao buscar refeições:", error);
@@ -74,7 +71,7 @@ export default function MealsPage() {
   }, [selectedDate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-screen bg-white dark:bg-[#0a0a0a] dark:bg-gradient-to-br dark:from-background dark:via-background to-muted/20">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <motion.div
           variants={containerVariants}
@@ -82,9 +79,8 @@ export default function MealsPage() {
           animate="visible"
           className="space-y-8"
         >
-          {/* Header */}
           <motion.div variants={itemVariants} className="text-center space-y-4">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-black dark:text-white ">
               Minhas Refeições
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -93,7 +89,6 @@ export default function MealsPage() {
             </p>
           </motion.div>
 
-          {/* Date Selector */}
           <motion.div
             variants={itemVariants}
             className="flex items-center justify-center gap-4"
@@ -102,15 +97,16 @@ export default function MealsPage() {
               variant="outline"
               size="icon"
               onClick={() => setSelectedDate(subDays(selectedDate, 1))}
+              className="bg-white dark:bg-background"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 text-black dark:text-white" />
             </Button>
 
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="min-w-[200px] justify-center bg-transparent"
+                  className="min-w-[200px] justify-center bg-transparent dark:text-white text-black  "
                 >
                   <Calendar className="w-4 h-4 mr-2" />
                   {format(selectedDate, "dd 'de' MMMM, yyyy", { locale: ptBR })}
@@ -132,16 +128,16 @@ export default function MealsPage() {
               variant="outline"
               size="icon"
               onClick={() => setSelectedDate(addDays(selectedDate, 1))}
+              className="bg-white dark:bg-background"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4  text-black dark:text-white" />
             </Button>
           </motion.div>
 
-          {/* Add Meal Button */}
           <motion.div variants={itemVariants} className="flex justify-center">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 shadow-lg"
+              className=" bg-background dark:border dark:text-white dark:hover:bg-white/20 cursor-pointer "
               onClick={() => router.push("/add-meals")}
             >
               <Plus className="w-5 h-5 mr-2" />
@@ -149,13 +145,11 @@ export default function MealsPage() {
             </Button>
           </motion.div>
 
-          {/* Meals List */}
           {listMeals && listMeals.length === 0 ? (
             <div
               className="flex flex-col items-center justify-center py-16 text-center"
               style={{ opacity: 0.3 }}
             >
-              {/* EmptyState code se preferir */}
               Nenhuma refeição registrada
             </div>
           ) : (
@@ -253,28 +247,6 @@ export default function MealsPage() {
                               </span>
                             </div>
                           </div>
-
-                          {/* Tags */}
-                          {/* <div className="flex flex-wrap gap-1">
-                        {meal.tags.map((tag) => (
-                          <Badge
-                            key={tag}
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                        {meal.estimatedByAI && (
-                          <Badge
-                            variant="outline"
-                            className="text-xs border-primary/20 text-primary"
-                          >
-                            <Bot className="w-3 h-3 mr-1" />
-                            IA
-                          </Badge>
-                        )}
-                      </div> */}
                         </CardContent>
                       </Card>
                     </motion.div>
