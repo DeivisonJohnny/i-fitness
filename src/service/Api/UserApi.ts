@@ -44,4 +44,10 @@ export default class UserApi {
   }): Promise<{ token: string }> {
     return Api.post("/user/auth", data);
   }
+
+  static async findHistoryWeight(): Promise<
+    { date: string; weight: number }[]
+  > {
+    return Api.get("/user/history/weight");
+  }
 }
