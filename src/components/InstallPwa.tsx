@@ -54,7 +54,7 @@ export const InstallButton = () => {
             </ul>
           ) : (
             <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
-              Toque em "&quot;Instalar&quot; para adicionar o aplicativo à sua
+              Toque em &quot;Instalar&quot; para adicionar o aplicativo à sua
               tela inicial.
             </p>
           )}
