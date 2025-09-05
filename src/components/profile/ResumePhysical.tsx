@@ -308,11 +308,15 @@ export default function ResumePhysical(props: ResumePhysicalProps) {
               </div>
               {isEditing && (
                 <div className="flex justify-end gap-2 mt-4">
-                  <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditing(false)}
+                    className="text-white transition-all duration-300 cursor-pointer "
+                  >
                     <X className="w-4 h-4 mr-2" />
                     Cancelar
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" className="cursor-pointer">
                     <Save className="w-4 h-4 mr-2" />
                     {loading ? (
                       <div className="flex items-center space-x-2">

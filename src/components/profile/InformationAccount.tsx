@@ -127,7 +127,7 @@ export default function InformationAccount(props: InformationAccount) {
                 </Label>
                 <Input
                   {...register("name")}
-                  className="text-foreground"
+                  className=" muted-foreground dark:text-foreground"
                   id="name"
                   disabled={!isEditingAccount}
                 />
@@ -146,7 +146,7 @@ export default function InformationAccount(props: InformationAccount) {
                 </Label>
                 <Input
                   {...register("surname")}
-                  className="text-foreground"
+                  className=" muted-foreground dark:text-foreground"
                   id="surname"
                   disabled={!isEditingAccount}
                 />
@@ -251,11 +251,12 @@ export default function InformationAccount(props: InformationAccount) {
                 <Button
                   variant="outline"
                   onClick={() => setIsEditingAccount(false)}
+                  className="text-white transition-all duration-300 cursor-pointer "
                 >
                   <X className="w-4 h-4 mr-2" />
                   Cancelar
                 </Button>
-                <Button>
+                <Button className="cursor-pointer">
                   <Save className="w-4 h-4 mr-2" />
                   {loading ? (
                     <div className="flex items-center space-x-2">

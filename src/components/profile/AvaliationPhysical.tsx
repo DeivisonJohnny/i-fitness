@@ -165,7 +165,7 @@ export default function AvaliationPhysical(props: PhysicalAssessment) {
                 <div className="flex items-start gap-2">
                   <FileText className="w-4 h-4 text-muted-foreground mt-0.5" />
                   <div>
-                    <h4 className="font-medium text-foreground mb-1">
+                    <h4 className="font-medium mb-1">
                       Explicação da Meta Calórica
                     </h4>
                     <p className="text-sm text-muted-foreground">
@@ -176,7 +176,7 @@ export default function AvaliationPhysical(props: PhysicalAssessment) {
               </div>
 
               <div>
-                <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                <h4 className="font-semibold mb-3 flex items-center gap-2">
                   <Apple className="w-4 h-4 text-primary" />
                   Distribuição de Macronutrientes
                 </h4>

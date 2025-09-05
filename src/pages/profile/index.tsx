@@ -48,7 +48,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 py-8">
+    <div className="min-h-screen bg-gradient-to-br  py-8">
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -56,7 +56,7 @@ export default function ProfilePage() {
         className="container mx-auto px-4 max-w-4xl"
       >
         <motion.div variants={itemVariants} className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-bold text-black dark:text-white mb-2">
             Meu Perfil
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
