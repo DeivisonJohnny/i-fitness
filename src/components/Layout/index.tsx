@@ -32,7 +32,7 @@ export default function Layout({ children }: Props) {
     );
   }
   return (
-    <Container className="dark:bg-background bg-[#f3f3f3]">
+    <Container className="dark:bg-black bg-[#f3f3f3] h-full ">
       <ThemeProvider
         attribute="class"
         defaultTheme="system"

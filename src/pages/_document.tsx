@@ -8,7 +8,7 @@ export default function Document() {
         <link rel="apple-touch-icon" href="/logo.png"></link>
         <meta name="theme-color" content="#0070f3" />
       </Head>
-      <body className="antialiased">
+      <body className="antialiased  ">
         <Main />
         <NextScript />
       </body>

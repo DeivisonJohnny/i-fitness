@@ -90,9 +90,9 @@ export default function DashboardPage() {
 
   return (
     <div className={`min-h-screen ${theme}`}>
-      <div className="flex min-h-screen bg-slate-950 dark:bg-background">
+      <div className="flex min-h-screen  bg-white dark:bg-background">
         <div className="flex-1 flex flex-col">
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-6 overflow-auto bg-[#fff_!important] dark:bg-[#0a0a0a_!important] ">
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -103,21 +103,21 @@ export default function DashboardPage() {
                 variants={itemVariants}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
               >
-                <Card className="bg-slate-900 dark:bg-card border-border">
+                <Card className=" dark:bg-card border-border">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                    <CardTitle className="text-sm font-medium text-black dark:text-muted-foreground">
                       Calorias
                     </CardTitle>
                     <Zap className="h-4 w-4 text-orange-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
+                    <div className="text-2xl font-bold  text-black/80 dark:text-foreground ">
                       {caloriesConsumed}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       de {me?.physicalAssessment?.dailyCaloricTarget} kcal
                     </p>
-                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                    <div className="w-full bg-[#e4e4e4] dark:bg-slate-800 rounded-full h-2 mt-2">
                       <div
                         className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full"
                         style={{
@@ -133,21 +133,21 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-slate-900 dark:bg-card border-border">
+                <Card className=" dark:bg-card border-border">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                    <CardTitle className="text-sm font-medium text-black dark:text-muted-foreground">
                       Proteínas
                     </CardTitle>
                     <Beef className="h-4 w-4 text-red-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
+                    <div className="text-2xl font-bold  text-black/80 dark:text-foreground ">
                       {proteinsGrams}g
                     </div>
                     <p className="text-xs text-muted-foreground">
                       de {me?.physicalAssessment?.proteinsGrams}g
                     </p>
-                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                    <div className="w-full bg-[#e4e4e4] dark:bg-slate-800 rounded-full h-2 mt-2">
                       <div
                         className="bg-gradient-to-r from-red-500 to-pink-500 h-2 rounded-full"
                         style={{
@@ -162,21 +162,21 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-slate-900 dark:bg-card border-border">
+                <Card className=" dark:bg-card border-border">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                    <CardTitle className="text-sm font-medium text-black dark:text-muted-foreground">
                       Carboidratos
                     </CardTitle>
                     <Wheat className="h-4 w-4 text-yellow-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
+                    <div className="text-2xl font-bold  text-black/80 dark:text-foreground ">
                       {carbs}g
                     </div>
                     <p className="text-xs text-muted-foreground">
                       de {me?.physicalAssessment?.carbohydratesGrams}g
                     </p>
-                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                    <div className="w-full bg-[#e4e4e4] dark:bg-slate-800 rounded-full h-2 mt-2">
                       <div
                         className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full"
                         style={{
@@ -192,21 +192,21 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-slate-900 dark:bg-card border-border">
+                <Card className=" dark:bg-card border-border">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                    <CardTitle className="text-sm font-medium text-black dark:text-muted-foreground">
                       Gorduras
                     </CardTitle>
                     <Droplets className="h-4 w-4 text-blue-500" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-foreground">
+                    <div className="text-2xl font-bold  text-black/80 dark:text-foreground ">
                       {fats}g
                     </div>
                     <p className="text-xs text-muted-foreground">
                       de {me?.physicalAssessment?.fatsGrams}g
                     </p>
-                    <div className="w-full bg-slate-800 rounded-full h-2 mt-2">
+                    <div className="w-full bg-[#e4e4e4] dark:bg-slate-800 rounded-full h-2 mt-2">
                       <div
                         className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
                         style={{
@@ -223,9 +223,9 @@ export default function DashboardPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <motion.div variants={itemVariants}>
-                  <Card className="bg-slate-900 dark:bg-card border-border">
+                  <Card className="bg-[#fff] dark:bg-card border-border">
                     <CardHeader>
-                      <CardTitle className="text-foreground">
+                      <CardTitle className=" text-black dark:text-muted-foreground">
                         Ingestão Semanal
                       </CardTitle>
                       <CardDescription className="text-muted-foreground">
@@ -273,12 +273,12 @@ export default function DashboardPage() {
                               y={Number(
                                 me.physicalAssessment.dailyCaloricTarget
                               )}
-                              stroke="#F87171"
+                              stroke={theme == "dark" ? "#ff5e5e" : "#d81b1b"}
                               strokeDasharray="4 4"
                               label={{
                                 value: "Meta diária",
                                 position: "insideTopRight",
-                                fill: "#F87171",
+                                fill: theme == "dark" ? "#ff5e5e" : "#d81b1b",
                                 fontSize: 12,
                               }}
                             />
@@ -302,9 +302,9 @@ export default function DashboardPage() {
                 </motion.div>
 
                 <motion.div variants={itemVariants}>
-                  <Card className="bg-slate-900 dark:bg-card border-border">
+                  <Card className="bg-[#fff] dark:bg-card border-border">
                     <CardHeader>
-                      <CardTitle className="text-foreground">
+                      <CardTitle className=" text-black dark:text-muted-foreground">
                         Refeições de Hoje
                       </CardTitle>
                       <CardDescription className="text-muted-foreground">
