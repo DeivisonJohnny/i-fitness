@@ -3,15 +3,22 @@
 import { usePWAInstall } from "@/hooks/usePwa";
 import Storage from "@/utils/Storage";
 import { useEffect, useState } from "react";
+import { Button, notification } from "antd";
+import { GoShare } from "react-icons/go";
 
 export const InstallButton = () => {
   const [isVisible, setIsVisible] = useState(true);
-
   const { canInstall, handleInstallClick } = usePWAInstall();
 
   useEffect(() => {
     const show = Storage.get("show-install-pwa", true);
     setIsVisible(show);
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    if (isIOS && show) {
+      showNotificationIOS();
+    }
   }, []);
 
   if (!isVisible || !canInstall) {
@@ -25,8 +32,40 @@ export const InstallButton = () => {
 
   function handleInstall() {
     handleInstallClick();
-
     handleNotShow();
+  }
+
+  function showNotificationIOS() {
+    notification.info({
+      message: "Instale o PCDigital no seu dispositivo",
+      key: "install",
+      description: (
+        <ul>
+          <li>
+            1. Toque no ícone (<GoShare />) de compartilhamento
+          </li>
+          <li>2. Toque em Adicionar à tela inicial ou Add to home screen</li>
+          <li>3. Toque em Adicionar</li>
+        </ul>
+      ),
+      duration: 0,
+      btn: (
+        <Button
+          className="link-button"
+          id="setup_button"
+          aria-label="Não mostrar novamente"
+          type="dashed"
+          title="Não mostrar novamente"
+          onClick={() => {
+            Storage.set("show-install-pwa", false);
+            notification.destroy("install");
+          }}
+        >
+          Não mostrar novamente
+        </Button>
+      ),
+      placement: "topRight",
+    });
   }
 
   return (
@@ -51,7 +90,7 @@ export const InstallButton = () => {
 
           <button
             onClick={handleInstall}
-            className="flex-1 px-4 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-lg transition-colors cursor-pointer "
+            className="flex-1 px-4 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-lg transition-colors cursor-pointer"
           >
             Instalar
           </button>
