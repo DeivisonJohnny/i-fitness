@@ -18,6 +18,7 @@ export default function routes(
   api.post("/user/me", auth(), UserController.findMe);
   api.put("/user", auth(), UserController.updateUser);
   api.post("/user/auth", UserController.auth);
+  api.get("/user/history/weight", auth(), UserController.findHistoryWeight);
 
   api.post("/auth/google", GoogleController.authGoogle);
 

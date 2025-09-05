@@ -107,6 +107,16 @@ export default class UserController {
         throw new ApiError("Dados não recebidos");
       }
 
+      const isUser = await Prisma.user.findUnique({
+        where: {
+          id: id,
+        },
+      });
+
+      if (!isUser) {
+        throw new ApiError("Usuario não encontrado", 404);
+      }
+
       const userUpdated = await Prisma.user.update({
         where: {
           id: id,
@@ -116,6 +126,15 @@ export default class UserController {
           ...userForUpdate,
         },
       });
+
+      if (userForUpdate.weight && isUser.weight != userForUpdate.weight) {
+        await Prisma.weightHistory.create({
+          data: {
+            userId: isUser.id,
+            weight: userForUpdate.weight,
+          },
+        });
+      }
 
       return res.json(userUpdated);
     } catch (error) {
@@ -179,5 +198,53 @@ export default class UserController {
     } catch (error) {
       return res.status(500).json(error);
     }
+  }
+
+  static async findHistoryWeight(req: NextApiRequest, res: NextApiResponse) {
+    const id = req.userId;
+
+    const historyWeight = await Prisma.user.findUnique({
+      where: { id },
+      select: {
+        historyWeight: {
+          orderBy: { createdAt: "asc" },
+        },
+      },
+    });
+
+    if (!historyWeight || !historyWeight.historyWeight.length) {
+      return res.json([]);
+    }
+
+    const today = new Date();
+    const year = today.getFullYear();
+
+    const start = new Date(year, 0, 1);
+    const end = new Date(year, today.getMonth(), 1);
+
+    const months: { date: string; weight: number }[] = [];
+    let cursor = new Date(start);
+
+    while (cursor <= end) {
+      const cursorYear = cursor.getFullYear();
+      const cursorMonth = cursor.getMonth();
+
+      const found = historyWeight.historyWeight
+        .filter(
+          (h) =>
+            h.createdAt.getFullYear() === cursorYear &&
+            h.createdAt.getMonth() === cursorMonth
+        )
+        .pop();
+
+      months.push({
+        date: `${cursorYear}-${String(cursorMonth + 1).padStart(2, "0")}-01`,
+        weight: found ? found.weight : 0,
+      });
+
+      cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    return res.json(months);
   }
 }

@@ -3,10 +3,16 @@
 import type React from "react";
 
 import { easeOut, motion } from "framer-motion";
-import { Key, Trash2, Settings } from "lucide-react";
+import { Key, Trash2, Settings, LineChart, Weight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -23,9 +29,28 @@ import InformationAccount from "@/components/profile/InformationAccount";
 import { Sex } from "@prisma/client";
 import ResumePhysical from "@/components/profile/ResumePhysical";
 import AvaliationPhysical from "@/components/profile/AvaliationPhysical";
+import { useEffect, useState } from "react";
+import UserApi from "@/service/Api/UserApi";
+import {
+  ResponsiveContainer,
+  LineChart as RechartsLineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Line,
+} from "recharts";
+
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useTheme } from "next-themes";
 
 export default function ProfilePage() {
   const { me } = useAuth();
+  const [historyWeight, setHistoryWeight] = useState<
+    { date: string; weight: number }[]
+  >([]);
+  const { theme } = useTheme();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -46,6 +71,17 @@ export default function ProfilePage() {
       transition: { duration: 0.5, ease: easeOut },
     },
   };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const historyWeight = await UserApi.findHistoryWeight();
+        setHistoryWeight(historyWeight);
+      } catch (error) {
+        console.log("🚀 ~ ProfilePage ~ error:", error);
+      }
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br  py-8">
@@ -101,6 +137,74 @@ export default function ProfilePage() {
           }
           createdAt={me?.physicalAssessment?.createdAt ?? new Date()}
         />
+        <motion.div variants={itemVariants} className="mb-8">
+          <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <LineChart className="w-5 h-5 text-primary" />
+                Evolução do Peso
+              </CardTitle>
+              <CardDescription>
+                Acompanhe seu peso ao longo do tempo.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="h-[300px] pt-4">
+              {historyWeight.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <RechartsLineChart
+                    data={historyWeight.map((d) => ({
+                      ...d,
+                      date: format(parseISO(d.date), "dd/MM", { locale: ptBR }),
+                    }))}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                    <XAxis dataKey="date" stroke="#9CA3AF" fontSize={12} />
+                    <YAxis
+                      stroke="#9CA3AF"
+                      fontSize={12}
+                      domain={["dataMin - 2", "dataMax + 2"]}
+                      tickFormatter={(value) => `${value} kg`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor:
+                          theme == "dark" ? "#292929" : "#f5f5f5",
+                        borderRadius: 10,
+                      }}
+                      formatter={(value: any) => [`${value} kg`, "Peso"]}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="weight"
+                      stroke="url(#lineGradient)"
+                      strokeWidth={3}
+                      dot={{ stroke: "#6366F1", strokeWidth: 2, r: 4 }}
+                      activeDot={{ r: 6, stroke: "#8B5CF6", strokeWidth: 2 }}
+                    />
+                    <defs>
+                      <linearGradient
+                        id="lineGradient"
+                        x1="0"
+                        y1="0"
+                        x2="1"
+                        y2="0"
+                      >
+                        <stop offset="0%" stopColor="#6366F1" />
+                        <stop offset="100%" stopColor="#8B5CF6" />
+                      </linearGradient>
+                    </defs>
+                  </RechartsLineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                  <Weight className="w-12 h-12 mb-4" />
+                  <p>Registre mais pesos para ver sua evolução aqui!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
         <motion.div variants={itemVariants} className="mb-8">
           <Card className="border-border/50 bg-gradient-to-br from-card to-card/50 shadow-lg rounded-2xl">
