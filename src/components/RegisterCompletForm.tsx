@@ -24,6 +24,7 @@ import {
   typeTrainingOptions,
 } from "@/lib/enums";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { UtilClient } from "@/utils/UtilClient";
 
 export type FormComplementUser = {
   sex: string;
@@ -154,6 +155,24 @@ export default function CompletRegister() {
     }
   }
 
+  function formatDecimal(value: string): string {
+    let onlyNums = value.replace(/\D/g, "");
+
+    if (!onlyNums) {
+      return "";
+    }
+
+    if (onlyNums.length > 3) {
+      onlyNums = onlyNums.slice(0, 3);
+    }
+
+    if (onlyNums.length === 1) {
+      return onlyNums;
+    } else {
+      return `${onlyNums[0]},${onlyNums.substring(1)}`;
+    }
+  }
+
   return (
     <form
       onSubmit={handleSubmit(handleCompletRegister)}
@@ -228,7 +247,22 @@ export default function CompletRegister() {
               <Label htmlFor="height" className="mt-4">
                 Altura (m)
               </Label>
-              <Input id="height" {...register("height")} type="number" />
+              <Controller
+                name="height"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="height"
+                    value={
+                      field.value ? String(field.value).replace(".", ",") : ""
+                    }
+                    onChange={(e) => {
+                      const formatted = formatDecimal(e.target.value);
+                      field.onChange(formatted.replace(",", "."));
+                    }}
+                  />
+                )}
+              />
               {errors.height && (
                 <AnimatePresence mode="wait">
                   <motion.p
@@ -248,7 +282,23 @@ export default function CompletRegister() {
               <Label htmlFor="weight" className="mt-4">
                 Peso (kg)
               </Label>
-              <Input id="weight" {...register("weight")} type="number" />
+              <Controller
+                name="weight"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="weight"
+                    value={
+                      field.value ? String(field.value).replace(".", ",") : ""
+                    }
+                    onChange={(e) => {
+                      const formatted = UtilClient.formatWeight(e.target.value);
+                      e.target.value = formatted;
+                      field.onChange(formatted.replace(",", "."));
+                    }}
+                  />
+                )}
+              />
               {errors.weight && (
                 <AnimatePresence mode="wait">
                   <motion.p
