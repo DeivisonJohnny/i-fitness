@@ -19,4 +19,22 @@ export class UtilClient {
     }
     return onlyNums;
   }
+
+  static formatHeight(value: string): string {
+    let onlyNums = value.replace(/\D/g, "");
+
+    if (!onlyNums) {
+      return "";
+    }
+
+    if (onlyNums.length > 3) {
+      onlyNums = onlyNums.slice(0, 3);
+    }
+
+    if (onlyNums.length === 1) {
+      return onlyNums;
+    } else {
+      return `${onlyNums[0]},${onlyNums.substring(1)}`;
+    }
+  }
 }

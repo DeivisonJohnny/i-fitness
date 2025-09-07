@@ -37,6 +37,7 @@ import { toast } from "sonner";
 import UserApi, {
   ResumePhysical as ResumePhysicalProps,
 } from "@/service/Api/UserApi";
+import { UtilClient } from "@/utils/UtilClient";
 
 export default function ResumePhysical(props: ResumePhysicalProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -91,7 +92,6 @@ export default function ResumePhysical(props: ResumePhysicalProps) {
   type FormData = yup.InferType<typeof schemaResumePhysical>;
 
   const {
-    register,
     handleSubmit,
     control,
     formState: { errors },
@@ -162,11 +162,26 @@ export default function ResumePhysical(props: ResumePhysicalProps) {
                     <Ruler className="w-4 h-4" />
                     Altura (m)
                   </Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    {...register("height")}
-                    disabled={!isEditing}
+                  <Controller
+                    name="height"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="height"
+                        value={
+                          field.value
+                            ? String(field.value).replace(".", ",")
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const formatted = UtilClient.formatHeight(
+                            e.target.value
+                          );
+                          field.onChange(formatted.replace(",", "."));
+                        }}
+                        disabled={!isEditing}
+                      />
+                    )}
                   />
                   {errors.height && (
                     <p className="text-red-500">{errors.height.message}</p>
@@ -177,12 +192,30 @@ export default function ResumePhysical(props: ResumePhysicalProps) {
                     <Scale className="w-4 h-4" />
                     Peso Atual (kg)
                   </Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    {...register("weight")}
-                    disabled={!isEditing}
+
+                  <Controller
+                    name="weight"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="weight"
+                        value={
+                          field.value
+                            ? String(field.value).replace(".", ",")
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const formatted = UtilClient.formatWeight(
+                            e.target.value
+                          );
+                          e.target.value = formatted;
+                          field.onChange(formatted.replace(",", "."));
+                        }}
+                        disabled={!isEditing}
+                      />
+                    )}
                   />
+
                   {errors.weight && (
                     <p className="text-red-500">{errors.weight.message}</p>
                   )}

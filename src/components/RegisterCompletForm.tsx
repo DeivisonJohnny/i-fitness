@@ -155,24 +155,6 @@ export default function CompletRegister() {
     }
   }
 
-  function formatDecimal(value: string): string {
-    let onlyNums = value.replace(/\D/g, "");
-
-    if (!onlyNums) {
-      return "";
-    }
-
-    if (onlyNums.length > 3) {
-      onlyNums = onlyNums.slice(0, 3);
-    }
-
-    if (onlyNums.length === 1) {
-      return onlyNums;
-    } else {
-      return `${onlyNums[0]},${onlyNums.substring(1)}`;
-    }
-  }
-
   return (
     <form
       onSubmit={handleSubmit(handleCompletRegister)}
@@ -257,7 +239,7 @@ export default function CompletRegister() {
                       field.value ? String(field.value).replace(".", ",") : ""
                     }
                     onChange={(e) => {
-                      const formatted = formatDecimal(e.target.value);
+                      const formatted = UtilClient.formatHeight(e.target.value);
                       field.onChange(formatted.replace(",", "."));
                     }}
                   />
