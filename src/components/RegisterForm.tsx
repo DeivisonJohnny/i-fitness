@@ -11,6 +11,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/router";
+import { Eye, EyeOff } from "lucide-react";
 
 type FormRegisterUser = {
   name: string;
@@ -23,6 +24,8 @@ type FormRegisterUser = {
 export default function RegisterForm() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<"next" | "back">("next");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -219,9 +222,23 @@ export default function RegisterForm() {
               animate="animate"
               exit="exit"
             >
-              <div className="flex flex-col gap-[5px]">
+              {/* Senha */}
+              <div className="flex flex-col gap-[5px] relative">
                 <Label>Senha</Label>
-                <Input {...register("password")} type="password" />
+                <div className="relative">
+                  <Input
+                    {...register("password")}
+                    type={showPassword ? "text" : "password"}
+                    className="pr-10" // espaço pro ícone
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
                 {errors.password && (
                   <AnimatePresence mode="wait">
                     <motion.p
@@ -237,9 +254,28 @@ export default function RegisterForm() {
                   </AnimatePresence>
                 )}
               </div>
-              <div className="flex flex-col gap-[5px]">
+
+              {/* Confirmar Senha */}
+              <div className="flex flex-col gap-[5px] relative">
                 <Label className="mt-4">Confirmar senha</Label>
-                <Input {...register("confirmPassword")} type="password" />
+                <div className="relative">
+                  <Input
+                    {...register("confirmPassword")}
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
                 {errors.confirmPassword && (
                   <AnimatePresence mode="wait">
                     <motion.p
@@ -255,10 +291,9 @@ export default function RegisterForm() {
                   </AnimatePresence>
                 )}
               </div>
-              <div
-                className="flex
-            flex-col justify-between gap-2 mt-4"
-              >
+
+              {/* Botões */}
+              <div className="flex flex-col justify-between gap-2 mt-4">
                 <Button
                   className="w-full"
                   variant={"secondary"}
