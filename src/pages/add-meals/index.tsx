@@ -166,9 +166,11 @@ export default function AddMeals() {
         imageUrl = newAttachment?.url || "";
       }
 
+      const fullDateTime = generateFullDateTime(mealData.time);
+
       const response = await MealsApi.create({
         description: mealData.description,
-        time: mealData.time,
+        time: fullDateTime,
         type: mealData.type as TypesMeal,
         urlImage: imageUrl,
       });
@@ -226,6 +228,16 @@ export default function AddMeals() {
       y: 0,
       transition: { duration: 0.5, ease: easeOut },
     },
+  };
+
+  const generateFullDateTime = (timeString: string): string => {
+    const now = new Date();
+
+    const [hours, minutes] = timeString.split(":").map(Number);
+
+    now.setHours(hours, minutes, 0, 0);
+
+    return now.toISOString();
   };
 
   const AssessmentView = () => {

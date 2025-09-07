@@ -3,12 +3,13 @@ import { NextApiRequest, NextApiResponse } from "next/types";
 import { GeminiApi } from "@/service/Api/GeminiApi";
 import GeminiConstants from "@/utils/GeminiContants";
 import Prisma from "@/service/Prisma";
+import { MealType } from "@/service/Api/MealsApi";
 
 export default class MealsController {
   static async createMeal(req: NextApiRequest, res: NextApiResponse) {
     try {
       const id = req.userId;
-      const data = req.body;
+      const data = req.body as MealType;
 
       if (!data || !data.urlImage || !data.urlImage.startsWith("http")) {
         throw new ApiError(
@@ -38,17 +39,13 @@ export default class MealsController {
         mimeType
       );
 
-      const [hours, minutes] = data.time.split(":").map(Number);
-      const now = new Date();
-      now.setHours(hours, minutes, 0, 0);
-
       const meal = await Prisma.meals.create({
         data: {
           userId: id,
           description: data.description,
           imgUrl: data.urlImage,
           type: data.type,
-          hourMeal: now,
+          hourMeal: data.time,
           AssessmentMeals: {
             create: {
               calories: resultAssessment.calories,
