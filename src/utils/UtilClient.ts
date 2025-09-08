@@ -27,14 +27,17 @@ export class UtilClient {
       return "";
     }
 
-    if (onlyNums.length > 3) {
-      onlyNums = onlyNums.slice(0, 3);
+    if (onlyNums.length > 5) {
+      onlyNums = onlyNums.slice(0, 5);
     }
 
-    if (onlyNums.length === 1) {
+    if (onlyNums.length <= 3) {
       return onlyNums;
-    } else {
-      return `${onlyNums[0]},${onlyNums.substring(1)}`;
     }
+
+    const inteiros = onlyNums.slice(0, 3);
+    const decimais = onlyNums.slice(3);
+
+    return `${inteiros},${decimais}`;
   }
 }
