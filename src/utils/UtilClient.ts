@@ -31,12 +31,13 @@ export class UtilClient {
       onlyNums = onlyNums.slice(0, 5);
     }
 
-    if (onlyNums.length <= 3) {
+    if (onlyNums.length <= 2) {
       return onlyNums;
     }
 
-    const inteiros = onlyNums.slice(0, 3);
-    const decimais = onlyNums.slice(3);
+    const commaPosition = onlyNums.length - 2;
+    const inteiros = onlyNums.slice(0, commaPosition);
+    const decimais = onlyNums.slice(commaPosition);
 
     return `${inteiros},${decimais}`;
   }
