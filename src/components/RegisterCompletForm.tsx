@@ -275,7 +275,6 @@ export default function CompletRegister() {
                     }
                     onChange={(e) => {
                       const formatted = UtilClient.formatWeight(e.target.value);
-                      e.target.value = formatted;
                       field.onChange(formatted.replace(",", "."));
                     }}
                   />

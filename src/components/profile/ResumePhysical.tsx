@@ -208,7 +208,6 @@ export default function ResumePhysical(props: ResumePhysicalProps) {
                           const formatted = UtilClient.formatWeight(
                             e.target.value
                           );
-                          e.target.value = formatted;
                           field.onChange(formatted.replace(",", "."));
                         }}
                         disabled={!isEditing}
